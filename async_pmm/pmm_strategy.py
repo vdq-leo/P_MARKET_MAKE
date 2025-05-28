@@ -40,7 +40,7 @@ class PMMStrategy:
         # Initialize parameters
         self._init_strategy_params(strategy_params)
         self._init_inventory_params()
-        self._init_risk_management_params()
+        self._init_risk_management_params() # Not use yet
         
         # Market data
         self.ticker_data = {}
@@ -136,9 +136,7 @@ class PMMStrategy:
             "total_value": 0.0,         # Total portfolio value in quote currency
             "base_trade_size": 50.0,
             "min_trade_size": 10.0,     # Minimum trade size in quote currency
-            "max_trade_size": 100.0,    # Maximum trade size in quote currency
-            "base_increment": 0.001,    # Minimum base asset increment
-            "quote_increment": 0.01,    # Minimum quote asset increment
+            "max_trade_size": 100.0    # Maximum trade size in quote currency
         }
     
     def _init_risk_management_params(self):

@@ -45,6 +45,11 @@ STRATEGY_PARAMS = {
     
     # Order distribution
     "size_multiplier": 2,     # Size multiplier for orders further from mid
+
+    # Trade parameters
+    "base_trade_size": 50.0,
+    "min_trade_size": 10.0,     # Minimum trade size in quote currency
+    "max_trade_size": 100.0,    # Maximum trade size in quote currency
 }
 
 async def request_demo_funds(api_key, api_secret):

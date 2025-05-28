@@ -72,22 +72,26 @@ You can customize the strategy parameters in `run_async_pmm.py`:
 ```python
 STRATEGY_PARAMS = {
     # Order parameters
-    "order_count": 3,           # Number of orders on each side
-    "min_spread": 0.0010,       # Minimum spread (0.1%)
-    "max_spread": 0.0050,       # Maximum spread (0.5%)
-    "vol_scale": 1.0,           # Volatility impact on spread
-    "skew_factor": 0.2,         # Inventory skew impact
-    "refresh_time": 60,         # Order refresh time in seconds
-    "price_precision": 2,       # Price decimal precision
-    "size_precision": 6,        # Size decimal precision
+    "use_imbalance_price": True,   # Use imbalance price for order placement
+    "order_count": 1,           # Number of orders on each side
+    "base_spread": 0.0002,
+    "min_spread": 0.0002,       # Minimum spread 
+    "max_spread": 0.0005,       # Maximum spread 
+    "vol_scale": 1,           # Volatility impact on spread
+    "skew_factor": 0,           # Inventory skew impact
+    "refresh_time": 1,          # Order refresh time in seconds
     
     # Volatility parameters
-    "vol_window": 20,           # Window for volatility calculation
-    "vol_ema_period": 10,       # EMA period for volatility smoothing
+    "use_dynamic_vol": True,    # Use dynamic volatility
+    "vol_window": 5,           # Window for volatility calculation
     
     # Order distribution
-    "price_spacing": 0.0015,    # Spacing between orders (0.15%)
-    "size_multiplier": 1.5,     # Size multiplier for orders further from mid
+    "size_multiplier": 2,     # Size multiplier for orders further from mid
+
+    # Trade parameters
+    "base_trade_size": 50.0,
+    "min_trade_size": 10.0,     # Minimum trade size in quote currency
+    "max_trade_size": 100.0,    # Maximum trade size in quote currency
 }
 ```
 
@@ -101,4 +105,4 @@ STRATEGY_PARAMS = {
 
 ## License
 
-MIT
+LEO
