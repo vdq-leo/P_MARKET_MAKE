@@ -32,11 +32,11 @@ STRATEGY_PARAMS = {
     # Order parameters
     "use_imbalance_price": True,   # Use imbalance price for order placement
     "order_count": 1,           # Number of orders on each side
-    "base_spread": 0.0002,
-    "min_spread": 0.0002,       # Minimum spread 
+    "base_spread": 0.0003,
+    "min_spread": 0.0001,       # Minimum spread 
     "max_spread": 0.0005,       # Maximum spread 
     "vol_scale": 1,           # Volatility impact on spread
-    "skew_factor": 0,           # Inventory skew impact
+    "skew_factor": 1,           # Inventory skew impact
     "refresh_time": 1,          # Order refresh time in seconds
     
     # Volatility parameters

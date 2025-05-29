@@ -75,10 +75,10 @@ class OrderManager:
         # Start order processing tasks
         asyncio.create_task(self._process_order_queue())
         asyncio.create_task(self._process_cancel_queue())
-        asyncio.create_task(self._process_order_updates_queue())
+        # asyncio.create_task(self._process_order_updates_queue())
         
         # Fetch initial open orders
-        await self._fetch_open_orders()
+        # await self._fetch_open_orders()
         
         self.logger.info(f"Order manager started for {self.symbol}")
     

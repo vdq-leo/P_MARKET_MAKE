@@ -359,9 +359,10 @@ class BybitRestClient:
         params = {"category": category}
         if symbol:
             params["symbol"] = symbol
-            
+
         response = await self._request("GET", "/v5/position/list", params=params, auth=True)
-        return response.get("list", [])
+        re_data = response.get("list", [])
+        return re_data
     
     # Order Endpoints
     
@@ -593,3 +594,45 @@ class BybitRestClient:
             ]
             
         return await self._request("POST", "/v5/account/demo-apply-money", params=params, auth=True)
+    
+    async def get_trade_history(self, category: str, symbol: Optional[str] = None, **kwargs) -> List[Dict[str, Any]]:
+        """
+        Get trade history
+        
+        Args:
+            category: Product category (spot, linear, inverse)
+            symbol: Trading pair symbol (e.g., 'BTCUSDT')
+            
+        Returns:
+            List of trade history
+        """
+        params = {"category": category}
+        
+        if symbol:
+            params["symbol"] = symbol
+        
+        params.update(kwargs)
+
+        return await self._request("GET", "/v5/execution/list", params=params, auth=True)
+    
+
+    async def get_pnl(self, category: str, symbol: Optional[str] = None, **kwargs) -> List[Dict[str, Any]]:
+        """
+        Get PNL
+        
+        Args:
+            category: Product category (spot, linear, inverse)
+            symbol: Trading pair symbol (e.g., 'BTCUSDT')
+            
+        Returns:
+            List of PNL
+        """
+        params = {"category": category}
+        
+        if symbol:
+            params["symbol"] = symbol
+        
+        params.update(kwargs)
+
+        return await self._request("GET", "/v5/position/closed-pnl", params=params, auth=True)
+    

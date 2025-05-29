@@ -99,13 +99,16 @@ class PMMApplication:
             # Subscribe to market data
             await self.ws_client.subscribe_ticker(self.symbol_pair)
             await self.ws_client.subscribe_kline(self.symbol_pair, "1")
-            await self.ws_client.subscribe_orderbook(self.symbol_pair, "50")
+            # await self.ws_client.subscribe_orderbook(self.symbol_pair, "50")
+            # await self.ws_client.subscribe_positions(self.symbol_pair, "50")
             
             # Register callbacks
             self.ws_client.register_ticker_callback(self.symbol_pair, self._handle_ticker_update)
             self.ws_client.register_kline_callback(self.symbol_pair, "1", self._handle_kline_update)
-            # self.ws_client.register_position_callback(self.symbol_pair, "1", self._handle_position_update)
-            # self.ws_client.register_orderbook_callback(self.symbol_pair, self._handle_orderbook_update)
+            # self.ws_client.register_orderbook_callback(self.symbol_pair, self._handle_orderbook_update) # Not support yet
+            # self.ws_client.register_position_callback(self.symbol_pair, "1", self._handle_position_update) # Not need yet
+            
+            asyncio.create_task(self._poll_position_info(interval=1.0))
             
             # Start order manager
             await self.order_manager.start()
@@ -147,7 +150,20 @@ class PMMApplication:
             
         except Exception as e:
             self.logger.error(f"Error stopping PMM application: {e} {e.__traceback__.tb_lineno}")
-    
+
+    async def _poll_position_info(self, interval: float = 1.0):
+        """
+        Polls position info periodically (default: every 1 second)
+        """
+        while True:
+            try:
+                position_info = await self.rest_client.get_positions(self.category, self.symbol_pair)
+                if position_info:
+                    await self._handle_position_update(position_info)
+            except Exception as e:
+                self.logger.error(f"Error in position polling loop: {e}")
+            await asyncio.sleep(interval)
+
     async def _fetch_initial_data(self):
         """Fetch initial market data"""
         try:
@@ -207,10 +223,9 @@ class PMMApplication:
     
     async def _run_strategy_loop(self):
         """Main strategy loop"""
-        self.logger.info("Starting strategy loop")
-        # self.logger.info(f"Warm-up time: 5 seconds")
-        # await asyncio.sleep(5)
+        self.logger.info("Starting strategy")
 
+        asyncio.create_task(self._log_params())
         while self.running and not self.stop_event.is_set():
             try:
                 # Check if we should refresh orders
@@ -223,7 +238,7 @@ class PMMApplication:
                         await self._refresh_orders()
                     
                 # Small sleep to prevent CPU spinning
-                await asyncio.sleep(0.005)
+                await asyncio.sleep(0.05)
                 
             except Exception as e:
                 self.logger.error(f"Error in strategy loop: {e} {e.__traceback__.tb_lineno}")
@@ -271,6 +286,17 @@ class PMMApplication:
         except Exception as e:
             self.logger.error(f"Error refreshing orders: {e} {e.__traceback__.tb_lineno}")
 
+    async def _log_params(self, interval: float = 5.0):
+        """Continuously log strategy parameters"""
+        while True:
+            try:
+                spread = self.strategy.spread
+                skew = self.strategy.skew
+                vol = self.strategy.volatility
+                self.logger.info(f"Volatility: {vol} -- Spread: {spread} -- Skew: {skew}")
+            except Exception as e:
+                self.logger.error(f"Error logging parameters: {e}")
+            await asyncio.sleep(interval)
 
 async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: str = "USDT",
                  category: str = "linear", testnet: bool = True, 
@@ -317,7 +343,6 @@ async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: st
     finally:
         # Ensure application is stopped
         await app.stop()
-
 
 def main():
     """Main entry point"""

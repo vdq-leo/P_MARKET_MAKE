@@ -57,11 +57,14 @@ class PMMStrategy:
         self.volatility = 0.0
         self.fair_price = 0.0
         self.old_fair_price = 0.0
-        self.skew = 0.0
+        
         self.inventory_ratio = 0.5  # Neutral position (0.0 = all quote, 1.0 = all base)
-        self.position = 0.0
+        self.position_normalize = 0.0 # Use for perp
         self.trade_size = 0.0
+        self.trade_base_size = 0.0
+
         self.spread = None
+        self.skew = 0.0000
         
         # Order tracking
         self.active_orders = {}
@@ -69,6 +72,10 @@ class PMMStrategy:
         
         self.logger.info(f"Initialized PMM strategy for {self.symbol_pair}")
     
+    @staticmethod
+    def clamp(value, min_value, max_value):
+        return max(min(value, max_value), min_value)
+
     async def set_scale(self):
         scale = await self.rest_client.get_scale(self.category, self.symbol_pair)
         self.price_scale = int(scale['price_scale'])
@@ -222,9 +229,15 @@ class PMMStrategy:
             Current inventory ratio (0.0 = all quote, 1.0 = all base)
         """
         if self.category == "linear":
-            self.skew = self.volatility * self.position * self.params["skew_factor"]
-            return
-        
+            position = self.position_data[0]
+
+            side = 1 if position["side"].lower() == "buy" else -1 
+            size = float(position["size"])
+            position_normalize = size * side / self.trade_base_size
+
+            self.position_normalize = position_normalize
+            self.skew = -self.params["skew_factor"] * position_normalize * self.volatility**2 * 0.5
+
         try:
             base_value = self.inventory["base_balance"] * self.fair_price
             total_value = base_value + self.inventory["quote_balance"]
@@ -250,16 +263,17 @@ class PMMStrategy:
         """
         try:
             # Ensure within min/max bounds
-            self.trade_size = max(
-                self.inventory["min_trade_size"],
-                min(self.inventory['base_trade_size'], self.inventory["max_trade_size"])
-            )
             
-            return self.trade_size
+            self.trade_size = self.clamp(self.trade_size, self.inventory["min_trade_size"], self.inventory["max_trade_size"])
+            
+            if self.fair_price == 0:
+                fair_price = await self.compute_fair_price()
+                self.trade_base_size = self.trade_size / fair_price
+            else:
+                self.trade_base_size = self.trade_size / self.fair_price
             
         except Exception as e:
             self.logger.error(f"Error updating trade size: {e}")
-            return self.trade_size
     
     async def update_spread(self) -> float:
         """
@@ -276,18 +290,12 @@ class PMMStrategy:
         
         try:
             # Calculate spread based on volatility
-            vol_spread = self.volatility * self.params["vol_scale"]
+            vol_spread = self.params['base_spread'] + self.volatility * self.params["vol_scale"] * 0.5
             
-            # Clamp within min/max bounds
-            new_spread = max(
-                self.params["min_spread"],
-                min(vol_spread, self.params["max_spread"])
-            )
-
             # Update only if there's a change
-            if not hasattr(self, "spread") or abs(new_spread - self.spread) > 1e-9:
-                self.spread = new_spread
-                self.logger.info(f"Updated spread: {self.spread}")
+            if not hasattr(self, "spread") or abs(vol_spread - self.spread) > 1e-9:
+                self.spread = vol_spread
+                # self.logger.info(f"Updated spread: {self.spread}")
 
             return self.spread
 
@@ -315,20 +323,21 @@ class PMMStrategy:
 
             if bid_price > 0 and ask_price > 0:
                 if self.params['use_imbalance_price'] and bid_size > 0 and ask_size > 0:
-                    self.fair_price = (bid_price * bid_size + ask_price * ask_size) / (bid_size + ask_size)
+                    fair_price = (bid_price * bid_size + ask_price * ask_size) / (bid_size + ask_size)
                 else:
-                    self.fair_price = (bid_price + ask_price) / 2
+                    fair_price = (bid_price + ask_price) / 2
             else:
                 self.logger.warning("Cannot calculate fair price: Missing bid/ask data")
                 return None
             
-            return self.fair_price
+            self.fair_price = fair_price + self.skew
+
+            return fair_price
 
         except Exception as e:
             self.logger.error(f"Error computing fair price: {e}")
             return None
 
-    
     async def generate_orders(self) -> Dict[str, List[Dict[str, Any]]]:
         """
         Generate orders for both sides of the book
@@ -375,10 +384,8 @@ class PMMStrategy:
         orders = []
         try:
             is_buy = side == "buy"
-            spread_with_skew = self.spread + self.skew if is_buy else self.spread - self.skew
-            spread_with_skew = max(self.params["min_spread"], spread_with_skew)
-
-            base_price = fair_price * (1 - spread_with_skew) if is_buy else fair_price * (1 + spread_with_skew)
+            spread = self.spread
+            base_price = fair_price * (1 - spread) if is_buy else fair_price * (1 + spread)
             price_step = max(self.spread, self.params["min_spread"])
             size_multiplier = self.params["size_multiplier"]
             max_trade = self.inventory["max_trade_size"]
@@ -387,8 +394,8 @@ class PMMStrategy:
             tick_size = self.tick_size
             price_scale = self.price_scale
             qty_scale = self.qty_scale
-            trade_size = self.trade_size
 
+            
             for i in range(self.params["order_count"]):
                 factor = 1.0 + i * price_step
 
@@ -401,9 +408,8 @@ class PMMStrategy:
 
                 price = round(price, price_scale)
 
-                size_quote = trade_size * (size_multiplier ** i)
-                size_base = size_quote / price
-                size_base = max(min(size_base, max_trade / price), min_trade / price)
+                size_base =  self.trade_base_size * (size_multiplier ** i)
+                size_base = self.clamp(size_base, min_trade / price, max_trade / price)
                 size_base = round(size_base, qty_scale)
 
                 orders.append({
@@ -418,8 +424,7 @@ class PMMStrategy:
         except Exception as e:
             self.logger.error(f"Error generating {side} orders: {e}")
             return []
-
-    
+   
     async def update_balances(self, base_balance: float, quote_balance: float):
         """
         Update current balances
@@ -459,7 +464,7 @@ class PMMStrategy:
             
         except Exception as e:
             self.logger.error(f"Error processing trade: {e}")
-    
+
     async def should_refresh_orders(self, current_time: float) -> bool:
         """
         Determine if orders should be refreshed

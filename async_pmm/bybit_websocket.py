@@ -9,6 +9,7 @@ import hmac
 import hashlib
 import websockets
 import uvloop
+import inspect
 from typing import Dict, List, Any, Callable, Optional, Set
 from urllib.parse import urlencode
 
@@ -21,11 +22,11 @@ class BybitWebSocketClient:
     """
     
     # WebSocket endpoints
-    PUBLIC_WS_URL = "wss://stream.bybit.com/v5/public/linear"  # Public data is identical to mainnet
-    PRIVATE_WS_URL = "wss://stream.bybit.com/v5/private"  # Demo private endpoint
+    PUBLIC_WS_URL = "wss://stream.bybit.com/v5/public"  # Public data is identical to mainnet
+    PRIVATE_WS_URL = "wss://stream.bybit.com/v5/private"  # Private endpoint
     
     def __init__(self, api_key: Optional[str] = None, api_secret: Optional[str] = None, 
-                 testnet: bool = True, ping_interval: int = 20):
+                 testnet: bool = True, ping_interval: int = 20, category: str = "linear"):
         """
         Initialize the WebSocket client
         
@@ -39,7 +40,8 @@ class BybitWebSocketClient:
         self.api_key = api_key
         self.api_secret = api_secret
         self.testnet = testnet
-        
+        self.category = category
+
         # WebSocket configuration
         self.ping_interval = ping_interval
         self.ping_timeout = 10
@@ -91,7 +93,7 @@ class BybitWebSocketClient:
         
         # Adjust URLs for testnet
         if self.testnet:
-            self.PUBLIC_WS_URL = "wss://stream.bybit.com/v5/public/linear"
+            self.PUBLIC_WS_URL = "wss://stream.bybit.com/v5/public"
             self.PRIVATE_WS_URL = "wss://stream-demo.bybit.com/v5/private"
 
     def _generate_signature(self, expires: int) -> str:
@@ -128,7 +130,7 @@ class BybitWebSocketClient:
         try:
             self.logger.info("Connecting to Bybit public WebSocket...")
             self.public_ws = await websockets.connect(
-                self.PUBLIC_WS_URL,
+                f'{self.PUBLIC_WS_URL}/{self.category}',
                 ping_interval=self.ping_interval,
                 ping_timeout=self.ping_timeout
             )
@@ -146,7 +148,10 @@ class BybitWebSocketClient:
             # Notify connection callbacks
             for callback in self.connection_callbacks:
                 try:
-                    callback(True)
+                    if inspect.iscoroutinefunction(callback):
+                        await callback(True)
+                    else:
+                        callback(True)
                 except Exception as e:
                     self.logger.error(f"Error in connection callback: {e}")
             
