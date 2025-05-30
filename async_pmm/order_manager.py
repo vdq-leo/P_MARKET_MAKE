@@ -184,11 +184,11 @@ class OrderManager:
     async def cancel_all_orders(self):
         """Cancel all active orders"""
         try:
-            self.logger.info("Cancelling all orders...")
             result = await self.rest_client.cancel_all_orders(self.category, self.symbol)
             
             # Clear active orders
             self.active_orders.clear()
+            self.logger.info("Cancelled all orders...")
             
             return result
             

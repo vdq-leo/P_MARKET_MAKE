@@ -267,33 +267,40 @@ class BybitWebSocketClient:
     
     async def _process_messages(self):
         """Process messages from the queue"""
-        while True:
-            try:
-                ws_type, message = await self.message_queue.get()
-                
-                # Parse JSON message
+        try:
+            while True:
                 try:
-                    data = json.loads(message)
-                except json.JSONDecodeError:
-                    self.logger.error(f"Invalid JSON message: {message}")
-                    continue
-                
-                # Handle ping/pong for older API versions
-                if "op" in data and data["op"] == "ping":
-                    await self._handle_ping(ws_type, data)
-                    continue
-                
-                # Process the message based on type
-                if ws_type == "public":
-                    await self._handle_public_message(data)
-                else:
-                    await self._handle_private_message(data)
-                
-            except Exception as e:
-                self.logger.error(f"Error processing message: {e}")
-            finally:
-                self.message_queue.task_done()
-    
+                    ws_type, message = await self.message_queue.get()
+                except asyncio.CancelledError:
+                    break  # exit cleanly if task is cancelled before .get() returns
+
+                try:
+                    # Parse JSON message
+                    try:
+                        data = json.loads(message)
+                    except json.JSONDecodeError:
+                        self.logger.error(f"Invalid JSON message: {message}")
+                        continue
+
+                    # Handle ping/pong
+                    if "op" in data and data["op"] == "ping":
+                        await self._handle_ping(ws_type, data)
+                        continue
+
+                    # Dispatch message
+                    if ws_type == "public":
+                        await self._handle_public_message(data)
+                    else:
+                        await self._handle_private_message(data)
+
+                except Exception as e:
+                    self.logger.error(f"Error processing message: {e}")
+                finally:
+                    self.message_queue.task_done()
+
+        except asyncio.CancelledError:
+            self.logger.info("Message processing task cancelled cleanly.")
+
     async def _handle_ping(self, ws_type: str, data: Dict[str, Any]):
         """
         Handle ping messages by responding with pong

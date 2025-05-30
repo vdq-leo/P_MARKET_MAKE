@@ -108,7 +108,7 @@ class PMMApplication:
             # self.ws_client.register_orderbook_callback(self.symbol_pair, self._handle_orderbook_update) # Not support yet
             # self.ws_client.register_position_callback(self.symbol_pair, "1", self._handle_position_update) # Not need yet
             
-            asyncio.create_task(self._poll_position_info(interval=1.0))
+            self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
             
             # Start order manager
             await self.order_manager.start()
@@ -118,7 +118,7 @@ class PMMApplication:
             
             # Start main loop
             self.running = True
-            await self._run_strategy_loop()
+            self.strategy_task = asyncio.create_task(self._run_strategy_loop(), name="strategy_task")
             
         except Exception as e:
             self.logger.error(f"Error starting PMM application: {e} {e.__traceback__.tb_lineno}")
@@ -126,30 +126,92 @@ class PMMApplication:
     
     async def stop(self):
         """Stop the PMM application"""
-        if not self.running:
-            return
-            
-        self.logger.info("Stopping PMM application...")
-        self.running = False
-        self.stop_event.set()
-        
         try:
-            # Cancel all orders
+            self.logger.info("Stopping PMM application...")
+            self.running = False
+
+            self.stop_event.set()  # Signal all loops early
+
+            try:
+                await self.close_position()
+                await asyncio.sleep(0.1)
+            except Exception as e:
+                self.logger.error(f"Error closing position: {e}")
+
+            # Gather all background tasks
+            background_tasks = [
+                getattr(self, 'websocket_task', None),
+                getattr(self, 'order_refresh_task', None),
+                getattr(self, 'risk_task', None),
+                getattr(self, 'position_task', None),
+                getattr(self, 'strategy_task', None),
+            ]
+
+            # Cancel all tasks
+            for task in background_tasks:
+                if task:
+                    task.cancel()
+                    await asyncio.sleep(0.1)
+                
+            # Wait for cancellation
+            for task in background_tasks:
+                if task:
+                    try:
+                        await task
+                        await asyncio.sleep(0.1)
+
+                    except asyncio.CancelledError:
+                        self.logger.info(f"Task {task.get_name() if hasattr(task, 'get_name') else ''} cancelled")
+
+            # Wait for tasks to finish
+            for task in background_tasks:
+                if task:
+                    try:
+                        await task
+                        await asyncio.sleep(0.1)
+
+                    except asyncio.CancelledError:
+                        self.logger.info(f"Task {task.get_name() if hasattr(task, 'get_name') else ''} cancelled")
+
+            # Now close clients and orders
             if self.order_manager:
-                await self.order_manager.cancel_all_orders()
-                await self.order_manager.stop()
-            
-            # Close connections
+                try:
+                    await self.order_manager.cancel_all_orders()
+                    await asyncio.sleep(0.1)
+
+                    await self.order_manager.stop()
+                    await asyncio.sleep(0.1)
+
+                except Exception as e:
+                    self.logger.error(f"Error stopping order manager: {e}")
+
+            try:
+                await self.close_position()
+                await asyncio.sleep(0.1)
+
+            except Exception as e:
+                self.logger.error(f"Error closing position: {e}")
+
             if self.ws_client:
-                await self.ws_client.close()
-                
+                try:
+                    await self.ws_client.close()
+                    await asyncio.sleep(0.1)
+
+                except Exception as e:
+                    self.logger.error(f"Error closing WebSocket client: {e}")
+
             if self.rest_client:
-                await self.rest_client.close()
-                
-            self.logger.info("PMM application stopped")
-            
+                try:
+                    await self.rest_client.close()
+                    await asyncio.sleep(0.1)
+
+                except Exception as e:
+                    self.logger.error(f"Error closing REST client: {e}")
+
+            self.logger.info("PMM application stopped successfully.")
+
         except Exception as e:
-            self.logger.error(f"Error stopping PMM application: {e} {e.__traceback__.tb_lineno}")
+            self.logger.error(f"Error stopping PMM application: {e}")
 
     async def _poll_position_info(self, interval: float = 1.0):
         """
@@ -294,13 +356,13 @@ class PMMApplication:
 
     async def _log_params(self, interval: float = 5.0):
         """Continuously log strategy parameters"""
-        asyncio.sleep(5)
+        await asyncio.sleep(5)
         while True:
             try:
                 spread = self.strategy.spread
                 skew = self.strategy.skew
                 vol = self.strategy.volatility
-                self.logger.info(f"Volatility: {vol} -- Spread: {spread} -- Skew: {skew}")
+                self.logger.info(f"Volatility: {vol:.5f} -- Spread: {spread:.5f} -- Skew: {skew:.5f}")
             except Exception as e:
                 self.logger.error(f"Error logging parameters: {e}")
             await asyncio.sleep(interval)
@@ -332,33 +394,40 @@ class PMMApplication:
         Closes the current open position (only for linear contracts).
         """
         if self.category != "linear":
-            return False
+            return 
 
         try:
-            positions = await self.rest_client.get_positions(self.category, self.symbol_pair)
-            if not positions:
-                return False
+            for attempt in range(4):
+                positions = await self.rest_client.get_positions(self.category, self.symbol_pair)
+                if not positions:
+                    # No positions left, done
+                    return
 
-            position = positions[0]
-            side = position["side"].lower()
-            curr_size = float(position.get('size', 0))
+                position = positions[0]
+                side = position["side"].lower()
+                curr_size = float(position.get('size', 0))
 
-            if curr_size == 0:
-                return False
+                if curr_size == 0:
+                    # Position already closed
+                    return
 
-            opposite_side = "Sell" if side == "buy" else "Buy"
-            await self.order_manager.place_order(
-                side=opposite_side,
-                order_type="Market",
-                qty=curr_size,
-                time_in_force="GTC"
-            )
-            self.logger.info(f"Closed {side} position of size {curr_size} with market order.")
-            return True
+                opposite_side = "Sell" if side == "buy" else "Buy"
+                await self.order_manager.place_order(
+                    side=opposite_side,
+                    order_type="Market",
+                    qty=curr_size,
+                    time_in_force="GTC",
+                    reduce_only=True
+                )
+                # self.logger.info(f"Attempt {attempt+1}: Placed market order to close {side} position of size {curr_size}")
+
+                # Wait a short period to allow the order to fill and position to update
+                await asyncio.sleep(1)
+
+            self.logger.warning("close_position: Reached max retry attempts but position might still be open.")
 
         except Exception as e:
             self.logger.error(f"Error closing position: {e}")
-            return False
 
 async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: str = "USDT",
                  category: str = "linear", testnet: bool = True, 

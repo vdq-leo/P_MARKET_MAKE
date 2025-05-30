@@ -165,7 +165,7 @@ class PMMStrategy:
             "max_position_value": 500.0,  # Maximum position value in quote currency
             "take_profit_value": 50, # Take profit value
             "stop_loss_value": 50, # Stop loss value
-            "max_drawdown": 200 # Maximum drawdown in quote currency
+            "max_drawdown_value": 200 # Maximum drawdown in quote currency
         }
         # Override defaults with provided parameters
         if strategy_params:
@@ -530,11 +530,17 @@ class PMMStrategy:
             return False
 
         side = position["side"].lower()
-        curr_position = float(position.get('positionValue', 0))
-        unrlzd_pnl = float(position.get('unrealisedPnl', 0))
+        curr_position = position.get('positionValue', 0)
+        unrlzd_pnl = position.get('unrealisedPnl', 0)
+
+        if curr_position == "" or unrlzd_pnl == "":
+            return False
+        else:
+            curr_position = float(curr_position)
+            unrlzd_pnl = float(unrlzd_pnl)
 
         # Adjust trading direction based on position size
-        if abs(curr_position) > self.params["max_position_size"]:
+        if abs(curr_position) > self.risk["max_position_value"]:
             if side == 'buy':
                 self.is_buy = False
             else:
@@ -544,11 +550,11 @@ class PMMStrategy:
             self.is_sell = True
 
         # Check take profit / stop loss conditions
-        if unrlzd_pnl > self.risk['take_profit_value']:
+        if unrlzd_pnl >= self.risk['take_profit_value']:
             self.logger.info(f"Take profit triggered: {unrlzd_pnl}")
             self.cum_rlzd_pnl += unrlzd_pnl
             return True
-        elif unrlzd_pnl < self.risk['stop_loss_value']:
+        elif unrlzd_pnl <= -self.risk['stop_loss_value']:
             self.logger.info(f"Stop loss triggered: {unrlzd_pnl}")
             self.cum_rlzd_pnl += unrlzd_pnl
             return True
