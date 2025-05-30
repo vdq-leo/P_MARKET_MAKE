@@ -249,6 +249,6 @@ async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit:
 
 
 if __name__ == "__main__":
-    asyncio.run(fetch_all_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
-    # asyncio.run(fetch_all_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
+    asyncio.run(fetch_all_pnl_to_csv("linear", "OPUSDT", "pnl_history.csv", 100))
+    asyncio.run(fetch_all_trade_history_to_csv("linear", "OPUSDT", "trade_history.csv", 100))
     # asyncio.run(main())

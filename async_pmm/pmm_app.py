@@ -313,7 +313,7 @@ class PMMApplication:
             # Update old fair price
             self.strategy.old_fair_price = self.strategy.fair_price
             
-            self.logger.info(f"Refreshed orders: {len(orders['buy'])} buys, {len(orders['sell'])} sells")
+            # self.logger.info(f"Refreshed orders: {len(orders['buy'])} buys, {len(orders['sell'])} sells")
             
         except Exception as e:
             self.logger.error(f"Error refreshing orders: {e} {e.__traceback__.tb_lineno}")

@@ -4,12 +4,34 @@ PMM Strategy Module - Core strategy implementation for market making
 import asyncio
 import time
 import numpy as np
-import json
+from numba import njit
 import math
 import pandas as pd
 from typing import Dict, List, Optional, Tuple, Any, Callable
 from datetime import datetime
 from logger import setup_logger_global
+
+@njit
+def compute_volatility(log_closes: np.ndarray, window: int) -> float:
+    n = log_closes.size
+    if n < window + 1:
+        return 0.0
+
+    # Compute returns from log prices (log-return = log(P_t / P_{t-1}))
+    returns = log_closes[n - window - 1 : n]  # last (window+1) values
+    sum_sq = 0.0
+    sum_ret = 0.0
+
+    for i in range(1, window + 1):
+        r = returns[i] - returns[i - 1]
+        sum_ret += r
+        sum_sq += r * r
+
+    mean_ret = sum_ret / window
+    variance = (sum_sq - window * mean_ret * mean_ret) / window  # Bessel's correction not used
+    vol = np.sqrt(variance) * np.sqrt(window)
+
+    return vol
 
 class PMMStrategy:
     """
@@ -56,10 +78,10 @@ class PMMStrategy:
         self.tick_size = None
 
         # Strategy state
+        self.spread = self.params["base_spread"]
         self.volatility = 0.0
         self.fair_price = 0.0
         self.old_fair_price = 0.0
-        self.spread = None
         self.skew = 0.0
         self.bid = None
         self.ask = None
@@ -112,17 +134,17 @@ class PMMStrategy:
         # Default strategy parameters
         self.params = {
             # Order parameters
-            "use_imbalance_price": False,  # Use imbalance price
+            "use_imbalance_price": True,  # Use imbalance price
             "order_count": 3,           # Number of orders on each side
             "base_spread": 0.0020,
-            "min_spread": 0.0020,       # Minimum spread (0.2%)
+            "min_spread": 0.0010,       # Minimum spread (0.2%)
             "max_spread": 0.0050,       # Maximum spread (0.5%)
             "vol_scale": 1.0,           # Volatility impact on spread
-            "skew_factor": 0.2,         # Inventory skew impact
+            "skew_factor": 0.5,         # Inventory skew impact
             "refresh_time": 60,         # Order refresh time in seconds
             
             # Volatility parameters
-            "use_dynamic_vol": False,
+            "use_dynamic_vol": True,
             "vol_window": 10,           # Window for volatility calculation
             
             # Order distribution
@@ -206,75 +228,85 @@ class PMMStrategy:
     
     async def update_volatility(self) -> float:
         """
-        Calculate market volatility from kline data
-        
-        Returns:
-            Current volatility estimate
+        Calculate market volatility from kline data using JIT-accelerated function
         """
         if not self.kline_data:
             return self.volatility
-            
+
         try:
-            # Extract close prices from klines
-            closes = [float(k['close']) for k in self.kline_data 
-                     if 'close' in k and k['close'] is not None]
-            
-            if len(closes) < self.params["vol_window"]:
+            closes = np.array([
+                float(k['close']) for k in self.kline_data
+                if 'close' in k and k['close'] is not None
+            ], dtype=np.float64)
+
+            if len(closes) < self.params["vol_window"] + 1:
                 return self.volatility
-                
-            # Calculate returns
-            returns = np.diff(np.log(closes))
-            
-            # Calculate volatility (standard deviation of returns)
-            vol = np.std(returns[-self.params["vol_window"]:]) * np.sqrt(self.params["vol_window"])  # Annualized
-            
-            # Apply EMA smoothing
+
+            log_closes = np.log(closes)
+            vol = compute_volatility(log_closes, self.params["vol_window"])
+
             self.volatility = vol
-            
             return self.volatility
-            
+
         except Exception as e:
             self.logger.error(f"Error calculating volatility: {e}")
             return self.volatility
 
     async def update_inventory_skew(self) -> float:
         """
-        Update inventory ratio based on current balances
-        
+        Update inventory ratio and compute inventory-based skew
+
         Returns:
-            Current inventory ratio (0.0 = all quote, 1.0 = all base)
+            Updated skew value (positive = favor buying, negative = favor selling)
         """
         try:
+            skew_factor = self.params["skew_factor"]
+
             if self.category == "linear":
                 position = self.position_data[0]
 
-                side = 1 if position["side"].lower() == "buy" else -1 
+                side = 1 if position["side"].lower() == "buy" else -1
+
+                if position["size"] is None:
+                    return self.skew
+                
                 size = float(position["size"])
-                position_normalize = int((size * side) / self.trade_base_size)
-                volatility = self.volatility
+                base_unit = self.trade_base_size
+                volatility = self.volatility or 0.00001  # avoid zero
 
-                skew = - position_normalize * volatility ** (2 - self.params["skew_factor"])
+                position_normalized = int((size * side) / base_unit)
 
-                self.position_normalize = position_normalize
+                # Skew logic: more inventory → less aggressive on that side
+                skew = -position_normalized * (volatility ** (2 - skew_factor))
+
+                self.position_normalize = position_normalized
                 self.skew = skew
 
             else:
-                
-                base_value = self.inventory["base_balance"] * self.fair_price
-                total_value = base_value + self.inventory["quote_balance"]
-                
+                # Spot-based inventory skew
+                fair_price = self.fair_price or 1.0
+                base_value = self.inventory.get("base_balance", 0.0) * fair_price
+                quote_value = self.inventory.get("quote_balance", 0.0)
+                total_value = base_value + quote_value
+
                 if total_value > 0:
-                    self.inventory_ratio = base_value / total_value
-                    self.inventory["total_value"] = total_value
+                    inventory_ratio = base_value / total_value
                 else:
-                    self.inventory_ratio = 0.5  # Default to neutral if no balance
-                    
-                # Calculate skew based on deviation from target ratio
-                self.skew = (self.inventory_ratio - self.inventory["target_ratio"]) * self.params["skew_factor"]
-            
+                    inventory_ratio = 0.5  # neutral
+
+                target_ratio = self.inventory.get("target_ratio", 0.5)
+                skew = (inventory_ratio - target_ratio) * skew_factor
+
+                self.inventory_ratio = inventory_ratio
+                self.inventory["total_value"] = total_value
+                self.skew = skew
+
+            return self.skew
+
         except Exception as e:
-            self.logger.error(f"Error updating inventory ratio: {e}")
-    
+            self.logger.error(f"Error updating inventory skew: {e}")
+            return 0.0
+
     async def update_trade_size(self) -> float:
         """
         Calculate appropriate trade size based on volatility and balance
@@ -298,43 +330,53 @@ class PMMStrategy:
     
     async def update_spread(self) -> float:
         """
-        Calculate bid-ask spread based on volatility and market conditions.
-        Only update if the new spread differs from the current one.
+        Dynamically update the bid-ask spread based on market volatility and strategy parameters.
 
         Returns:
-            Calculated spread as a decimal (e.g., 0.001 = 0.1%)
+            Updated spread value (e.g., 0.001 for 0.1%)
         """
-        self.spread = float(self.params['base_spread']) if self.spread is None else self.spread
-
-        if not self.params['use_dynamic_vol']:
-            return self.spread
-        
         try:
-            # Calculate spread based on volatility
-            vol_spread = self.params['base_spread'] + self.volatility * self.params["vol_scale"] * 0.5
+            base_spread = float(self.params.get("base_spread", 0.001))
+            vol_scale = float(self.params.get("vol_scale", 1.0))
+            min_spread = float(self.params.get("min_spread", 0.0001))
+            use_dynamic = self.params.get("use_dynamic_vol", False)
+
+            # Default to base spread if no volatility adjustment is needed
+            if not use_dynamic:
+                self.spread = base_spread
+                return self.spread
             
-            # Update only if there's a change
-            if not hasattr(self, "spread") or abs(vol_spread - self.spread) > 1e-9:
-                self.spread = vol_spread
-                # self.logger.info(f"Updated spread: {self.spread}")
+            # Compute dynamic spread
+            vol = self.volatility or 0.0
+            dynamic_spread = base_spread + max(vol * vol_scale * 0.5, 0.0)
+
+            # Enforce a floor
+            dynamic_spread = max(dynamic_spread, min_spread)
+
+            # Update only if significantly different
+            if abs(dynamic_spread - self.spread) > 1e-6:
+                self.spread = dynamic_spread
+                # self.logger.info(f"Updated spread to: {self.spread:.6f}")
 
             return self.spread
 
         except Exception as e:
             self.logger.error(f"Error updating spread: {e}")
-            return getattr(self, "spread", 0.0)
+            return self.spread if hasattr(self, "spread") else 0.001
     
     async def compute_fair_price(self) -> float:
         """
-        Calculate fair price from market data
+        Compute the fair price using top-of-book data and optional inventory skew adjustment.
 
         Returns:
-            Calculated fair price
+            Fair price (float) or None if data is invalid
         """
         try:
-            data = self.ticker_data
+            data = self.ticker_data or {}
             required_keys = {'bid1Price', 'ask1Price', 'bid1Size', 'ask1Size'}
-            if not data or not required_keys <= data.keys():
+
+            if not required_keys <= data.keys():
+                # Fetch fresh data if incomplete
                 data = await self.rest_client.get_ticker(self.category, self.symbol_pair)
 
             bid_price = float(data.get('bid1Price', 0))
@@ -342,16 +384,21 @@ class PMMStrategy:
             bid_size = float(data.get('bid1Size', 0))
             ask_size = float(data.get('ask1Size', 0))
 
-            if bid_price > 0 and ask_price > 0:
-                if self.params['use_imbalance_price'] and bid_size > 0 and ask_size > 0:
-                    fair_price_ = (bid_price * bid_size + ask_price * ask_size) / (bid_size + ask_size)
-                else:
-                    fair_price_ = (bid_price + ask_price) / 2
-            else:
-                self.logger.warning("Cannot calculate fair price: Missing bid/ask data")
+            if bid_price <= 0 or ask_price <= 0:
+                self.logger.warning("Invalid bid/ask price for fair price computation.")
                 return None
-            
-            fair_price = fair_price_ + self.skew
+
+            use_imbalance = self.params.get("use_imbalance_price", False)
+
+            if use_imbalance and bid_size > 0 and ask_size > 0:
+                fair_price_ = (bid_price * bid_size + ask_price * ask_size) / (bid_size + ask_size)
+            else:
+                fair_price_ = (bid_price + ask_price) / 2.0
+
+            # Add inventory skew if available and valid
+            skew = self.skew if isinstance(self.skew, (float, int)) else 0.0
+
+            fair_price = fair_price_ + skew
             self.fair_price = fair_price
 
             return fair_price
@@ -412,8 +459,9 @@ class PMMStrategy:
         try:
             is_buy = side == "buy"
             spread = self.spread
-            base_price = fair_price * (1 - spread) if is_buy else fair_price * (1 + spread)
-            price_step = max(self.spread, self.params["min_spread"])
+            adj_price = fair_price * (1 - spread) if is_buy else fair_price * (1 + spread)
+            price_step = max(spread, self.params["min_spread"])
+
             size_multiplier = self.params["size_multiplier"]
             max_trade = self.inventory["max_trade_value"]
             min_trade = self.inventory["min_trade_value"]
@@ -421,17 +469,17 @@ class PMMStrategy:
             tick_size = self.tick_size
             price_scale = self.price_scale
             qty_scale = self.qty_scale
-
+            trade_base_size = self.trade_base_size
             
             for i in range(self.params["order_count"]):
                 factor = 1.0 + i * price_step
 
                 if is_buy:
-                    raw_price = base_price / factor
-                    price = min(raw_price, raw_price - tick_size)
+                    raw_price = adj_price / factor
+                    price = min(raw_price, raw_price - tick_size / 2)
                 else:
-                    raw_price = base_price * factor
-                    price = max(raw_price, raw_price + tick_size)
+                    raw_price = adj_price * factor
+                    price = max(raw_price, raw_price + tick_size / 2)
 
                 price = round(price, price_scale)
 
@@ -441,7 +489,7 @@ class PMMStrategy:
                     else:
                         self.ask = price
 
-                size_base =  self.trade_base_size * (size_multiplier ** i)
+                size_base =  trade_base_size * (size_multiplier ** i)
                 size_base = self.clamp(size_base, min_trade / price, max_trade / price)
                 size_base = round(size_base, qty_scale)
 
@@ -508,20 +556,21 @@ class PMMStrategy:
         Returns:
             True if orders should be refreshed
         """
-        # Refresh if too much time has passed
+        # 1. Refresh if too much time has passed
         time_since_last_order = current_time - self.last_order_time
         if time_since_last_order > self.params["refresh_time"]:
-            # self.logger.info("Refreshing orders due to inactivity...")
             return True
-            
-        # Refresh if fair price has moved significantly
+
+        # 2. Refresh if fair price has moved significantly
         if self.old_fair_price:
             fair_price = await self.compute_fair_price()
             price_change = abs(fair_price - self.old_fair_price) / self.old_fair_price
-            if price_change >= self.params['min_spread'] / 2:
-                # self.logger.info("Refreshing orders due to price change...")
+
+            # Dynamic threshold based on spread
+            price_change_threshold = self.params['min_spread'] / 5
+            if price_change >= price_change_threshold:
                 return True
-            
+                
         return False
     
     async def handle_position_management(self):
@@ -599,7 +648,7 @@ class PMMStrategy:
 
         return False
 
-    async def _pnl_cron_job(self, interval: float = 60.0):
+    async def _pnl_cron_job(self, interval: float = 10.0):
         """Periodically fetch and update realized PnL."""
         while True:
             try:
@@ -631,13 +680,13 @@ class PMMStrategy:
                 if not cursor:
                     break
             
-            self.scan_time = int(time.time() * 1000)
-
             if all_trades:
                 df = pd.DataFrame(all_trades)
                 df["closedPnl"] = pd.to_numeric(df["closedPnl"], errors="coerce").fillna(0)
                 total_pnl = df["closedPnl"].sum()
                 self.cum_rlzd_pnl += total_pnl
+                self.logger.info(f"[PNL] updated: {total_pnl}" )
+                self.scan_time = int(time.time() * 1000)
             else:
                 self.logger.info("[PNL] No trades found.")
 

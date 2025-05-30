@@ -1,3 +1,0 @@
-[2025-05-30 16:32:15,634][bybit_rest.py:205][ERROR] Request error: 'NoneType' object has no attribute 'connect' 189
-[2025-05-30 16:33:10,182][bybit_rest.py:127][ERROR] API error: 110017 - current position is zero, cannot fix reduce-only order qty
-[2025-05-30 16:33:10,183][bybit_rest.py:205][ERROR] Request error: API error: 110017 - current position is zero, cannot fix reduce-only order qty 193
