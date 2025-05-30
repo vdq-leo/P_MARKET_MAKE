@@ -107,9 +107,7 @@ class PMMApplication:
             self.ws_client.register_kline_callback(self.symbol_pair, "1", self._handle_kline_update)
             # self.ws_client.register_orderbook_callback(self.symbol_pair, self._handle_orderbook_update) # Not support yet
             # self.ws_client.register_position_callback(self.symbol_pair, "1", self._handle_position_update) # Not need yet
-            
-            self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
-            
+                        
             # Start order manager
             await self.order_manager.start()
             
@@ -118,27 +116,27 @@ class PMMApplication:
             
             # Start main loop
             self.running = True
+            self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
             self.strategy_task = asyncio.create_task(self._run_strategy_loop(), name="strategy_task")
             
         except Exception as e:
             self.logger.error(f"Error starting PMM application: {e} {e.__traceback__.tb_lineno}")
             await self.stop()
-    
+        
     async def stop(self):
-        """Stop the PMM application"""
+        """Stop the PMM application."""
         try:
             self.logger.info("Stopping PMM application...")
             self.running = False
+            self.stop_event.set()  # Signal loops to stop
 
-            self.stop_event.set()  # Signal all loops early
-
+            # Attempt to close any open position
             try:
                 await self.close_position()
-                await asyncio.sleep(0.1)
             except Exception as e:
                 self.logger.error(f"Error closing position: {e}")
 
-            # Gather all background tasks
+            # Cancel background tasks
             background_tasks = [
                 getattr(self, 'websocket_task', None),
                 getattr(self, 'order_refresh_task', None),
@@ -147,71 +145,45 @@ class PMMApplication:
                 getattr(self, 'strategy_task', None),
             ]
 
-            # Cancel all tasks
             for task in background_tasks:
                 if task:
                     task.cancel()
-                    await asyncio.sleep(0.1)
-                
-            # Wait for cancellation
+
+            # Await task cancellation
             for task in background_tasks:
                 if task:
                     try:
                         await task
-                        await asyncio.sleep(0.1)
-
                     except asyncio.CancelledError:
-                        self.logger.info(f"Task {task.get_name() if hasattr(task, 'get_name') else ''} cancelled")
+                        task_name = getattr(task, 'get_name', lambda: 'Unnamed Task')()
+                        self.logger.info(f"Task {task_name} cancelled")
 
-            # Wait for tasks to finish
-            for task in background_tasks:
-                if task:
-                    try:
-                        await task
-                        await asyncio.sleep(0.1)
-
-                    except asyncio.CancelledError:
-                        self.logger.info(f"Task {task.get_name() if hasattr(task, 'get_name') else ''} cancelled")
-
-            # Now close clients and orders
+            # Clean up order manager
             if self.order_manager:
                 try:
                     await self.order_manager.cancel_all_orders()
-                    await asyncio.sleep(0.1)
-
                     await self.order_manager.stop()
-                    await asyncio.sleep(0.1)
-
                 except Exception as e:
                     self.logger.error(f"Error stopping order manager: {e}")
 
-            try:
-                await self.close_position()
-                await asyncio.sleep(0.1)
-
-            except Exception as e:
-                self.logger.error(f"Error closing position: {e}")
-
+            # Close WebSocket client
             if self.ws_client:
                 try:
                     await self.ws_client.close()
-                    await asyncio.sleep(0.1)
-
                 except Exception as e:
                     self.logger.error(f"Error closing WebSocket client: {e}")
 
+            # Close REST client
             if self.rest_client:
                 try:
                     await self.rest_client.close()
-                    await asyncio.sleep(0.1)
-
                 except Exception as e:
                     self.logger.error(f"Error closing REST client: {e}")
 
             self.logger.info("PMM application stopped successfully.")
 
         except Exception as e:
-            self.logger.error(f"Error stopping PMM application: {e}")
+            self.logger.error(f"Unexpected error while stopping PMM application: {e}")
 
     async def _poll_position_info(self, interval: float = 1.0):
         """
@@ -287,8 +259,8 @@ class PMMApplication:
         """Main strategy loop"""
         self.logger.info("Starting strategy")
 
-        asyncio.create_task(self._log_params())
-        asyncio.create_task(self._handle_position_risk())
+        asyncio.create_task(self._log_params(interval = 1))
+        asyncio.create_task(self._handle_position_risk(interval = 1))
 
         while self.running and not self.stop_event.is_set():
             try:
@@ -362,7 +334,11 @@ class PMMApplication:
                 spread = self.strategy.spread
                 skew = self.strategy.skew
                 vol = self.strategy.volatility
-                self.logger.info(f"Volatility: {vol:.5f} -- Spread: {spread:.5f} -- Skew: {skew:.5f}")
+                position_norm = self.strategy.position_normalize
+                is_buy = self.strategy.is_buy
+                is_sell = self.strategy.is_sell
+                self.logger.info(f"Volatility: {vol:.5f} -- Spread: {spread:.5f} -- Skew: {skew:.5f} -- Position: {int(position_norm)}")
+                self.logger.info(f"Buy: {is_buy} -- Sell: {is_sell}")
             except Exception as e:
                 self.logger.error(f"Error logging parameters: {e}")
             await asyncio.sleep(interval)

@@ -248,28 +248,32 @@ class PMMStrategy:
         Returns:
             Current inventory ratio (0.0 = all quote, 1.0 = all base)
         """
-        if self.category == "linear":
-            position = self.position_data[0]
-
-            side = 1 if position["side"].lower() == "buy" else -1 
-            size = float(position["size"])
-            position_normalize = size * side / self.trade_base_size
-
-            self.position_normalize = position_normalize
-            self.skew = -self.params["skew_factor"] * position_normalize * self.volatility**2 * 0.5
-
         try:
-            base_value = self.inventory["base_balance"] * self.fair_price
-            total_value = base_value + self.inventory["quote_balance"]
-            
-            if total_value > 0:
-                self.inventory_ratio = base_value / total_value
-                self.inventory["total_value"] = total_value
+            if self.category == "linear":
+                position = self.position_data[0]
+
+                side = 1 if position["side"].lower() == "buy" else -1 
+                size = float(position["size"])
+                position_normalize = int(size * side / self.trade_base_size)
+                volatility = self.volatility
+
+                skew = - position_normalize * volatility ** (2 - self.params["skew_factor"])
+
+                self.position_normalize = position_normalize
+                self.skew = skew
+
             else:
-                self.inventory_ratio = 0.5  # Default to neutral if no balance
+                base_value = self.inventory["base_balance"] * self.fair_price
+                total_value = base_value + self.inventory["quote_balance"]
                 
-            # Calculate skew based on deviation from target ratio
-            self.skew = (self.inventory_ratio - self.inventory["target_ratio"]) * self.params["skew_factor"]
+                if total_value > 0:
+                    self.inventory_ratio = base_value / total_value
+                    self.inventory["total_value"] = total_value
+                else:
+                    self.inventory_ratio = 0.5  # Default to neutral if no balance
+                    
+                # Calculate skew based on deviation from target ratio
+                self.skew = (self.inventory_ratio - self.inventory["target_ratio"]) * self.params["skew_factor"]
             
         except Exception as e:
             self.logger.error(f"Error updating inventory ratio: {e}")
@@ -343,14 +347,15 @@ class PMMStrategy:
 
             if bid_price > 0 and ask_price > 0:
                 if self.params['use_imbalance_price'] and bid_size > 0 and ask_size > 0:
-                    fair_price = (bid_price * bid_size + ask_price * ask_size) / (bid_size + ask_size)
+                    fair_price_ = (bid_price * bid_size + ask_price * ask_size) / (bid_size + ask_size)
                 else:
-                    fair_price = (bid_price + ask_price) / 2
+                    fair_price_ = (bid_price + ask_price) / 2
             else:
                 self.logger.warning("Cannot calculate fair price: Missing bid/ask data")
                 return None
             
-            self.fair_price = fair_price + self.skew
+            fair_price = fair_price_ + self.skew
+            self.fair_price = fair_price
 
             return fair_price
 
@@ -373,18 +378,19 @@ class PMMStrategy:
                 self.logger.warning("Cannot generate orders: Invalid fair price")
                 return {"buy": [], "sell": []}
             
-            buy_task = self.generate_orders_for_side("buy", fair_price) if self.is_buy else None
-            sell_task = self.generate_orders_for_side("sell", fair_price) if self.is_sell else None
+            tasks = []
 
-            buy_orders, sell_orders = await asyncio.gather(
-                buy_task if buy_task else asyncio.sleep(0),
-                sell_task if sell_task else asyncio.sleep(0)
-            )
+            # Append in order, preserving position for unpacking
+            tasks.append(self.generate_orders_for_side("buy", fair_price) if self.is_buy else asyncio.sleep(0))
+            tasks.append(self.generate_orders_for_side("sell", fair_price) if self.is_sell else asyncio.sleep(0))
+
+            buy_orders, sell_orders = await asyncio.gather(*tasks)
             
-            if not buy_orders or not sell_orders:
-                self.logger.warning("No orders generated.")
-                return {"buy": [], "sell": []}
-            
+            if not isinstance(buy_orders, list):
+                buy_orders = []
+            if not isinstance(sell_orders, list):
+                sell_orders = []
+
             return {
                 "buy": buy_orders,
                 "sell": sell_orders
@@ -517,7 +523,7 @@ class PMMStrategy:
     
     async def handle_position_management(self):
         """
-        Determine if the bot should handle (i.e., exit) the current position (only for linear contracts).
+        Determine if the bot should manage (i.e., exit) the current position for linear contracts.
 
         Returns:
             bool: True if take-profit or stop-loss condition is met; otherwise False.
@@ -525,39 +531,43 @@ class PMMStrategy:
         if self.category != "linear":
             return False
 
+        # Get first position (assumes single-position system)
         position = self.position_data[0]
         if not position:
             return False
 
-        side = position["side"].lower()
-        curr_position = position.get('positionValue', 0)
-        unrlzd_pnl = position.get('unrealisedPnl', 0)
-
-        if curr_position == "" or unrlzd_pnl == "":
+        try:
+            side = position.get("side", "").lower()
+            curr_position = float(position.get("positionValue", 0) or 0)
+            unrlzd_pnl = float(position.get("unrealisedPnl", 0) or 0)
+        except (ValueError, TypeError):
+            self.logger.warning("Position data malformed.")
             return False
-        else:
-            curr_position = float(curr_position)
-            unrlzd_pnl = float(unrlzd_pnl)
 
-        # Adjust trading direction based on position size
-        if abs(curr_position) > self.risk["max_position_value"]:
-            if side == 'buy':
-                self.is_buy = False
-            else:
-                self.is_sell = False
-        else:
-            self.is_buy = True
-            self.is_sell = True
-
-        # Check take profit / stop loss conditions
-        if unrlzd_pnl >= self.risk['take_profit_value']:
+        # Take profit or stop loss check
+        if unrlzd_pnl >= self.risk["take_profit_value"]:
             self.logger.info(f"Take profit triggered: {unrlzd_pnl}")
             self.cum_rlzd_pnl += unrlzd_pnl
             return True
-        elif unrlzd_pnl <= -self.risk['stop_loss_value']:
+
+        elif unrlzd_pnl <= -self.risk["stop_loss_value"]:
             self.logger.info(f"Stop loss triggered: {unrlzd_pnl}")
             self.cum_rlzd_pnl += unrlzd_pnl
             return True
+
+        # Adjust direction based on position size
+        over_limit = abs(curr_position) > self.risk["max_position_value"]
+        if over_limit:
+            if side == "buy":
+                self.is_buy = False
+                self.is_sell = True
+            elif side == "sell":
+                self.is_sell = False
+                self.is_buy = True
+        else:
+            # Reset both directions to allowed
+            self.is_buy = True
+            self.is_sell = True
 
         return False
 

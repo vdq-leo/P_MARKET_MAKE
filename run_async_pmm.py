@@ -34,9 +34,9 @@ STRATEGY_PARAMS = {
     "order_count": 1,           # Number of orders on each side
     "base_spread": 0.0002,
     "min_spread": 0.0001,       # Minimum spread 
-    "max_spread": 0.0005,       # Maximum spread 
+    "max_spread": 0.0010,       # Maximum spread 
     "vol_scale": 1,           # Volatility impact on spread
-    "skew_factor": 1,           # Inventory skew impact
+    "skew_factor": 0.5,           # Inventory skew impact
     "refresh_time": 1,          # Order refresh time in seconds
     
     # Volatility parameters
@@ -103,7 +103,7 @@ async def main():
     await run_pmm(
         api_key=api_key,
         api_secret=api_secret,
-        symbol="HYPE",
+        symbol="OP",
         quote="USDT",
         category="linear",
         testnet=True,  # Not using testnet, using demo API directly

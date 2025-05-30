@@ -97,7 +97,7 @@ STRATEGY_PARAMS = {
     "max_position_value": 500.0,  # Maximum position value in quote currency
     "take_profit_value": 50, # Take profit value
     "stop_loss_value": 50, # Stop loss value
-    "max_drawdown": 200 # Maximum drawdown in quote currency
+    "max_drawdown_value": 200 # Maximum drawdown in quote currency
 }
 ```
 
