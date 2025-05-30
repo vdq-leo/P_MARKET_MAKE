@@ -164,7 +164,7 @@ class BybitRestClient:
                 raise Exception("API key and secret required for authenticated endpoints")
 
             timestamp = int(time.time() * 1000)
-            recv_window = 1000
+            recv_window = 5000
 
             headers["X-BAPI-API-KEY"] = self.api_key
             headers["X-BAPI-TIMESTAMP"] = str(timestamp)

@@ -226,6 +226,8 @@ class PMMApplication:
         self.logger.info("Starting strategy")
 
         asyncio.create_task(self._log_params())
+        asyncio.create_task(self._handle_position_risk())
+
         while self.running and not self.stop_event.is_set():
             try:
                 # Check if we should refresh orders
@@ -254,25 +256,29 @@ class PMMApplication:
             # Generate new orders
             orders = await self.strategy.generate_orders()
             
-            # Place buy orders
-            for order in orders["buy"]:
-                await self.order_manager.place_order(
+            # Create task lists
+            buy_tasks = [
+                self.order_manager.place_order(
                     side="Buy",
                     order_type="Limit",
                     qty=order["quantity"],
                     price=order["price"],
                     time_in_force="GTC"
-                )
-            
-            # Place sell orders
-            for order in orders["sell"]:
-                await self.order_manager.place_order(
+                ) for order in orders.get("buy", [])
+            ]
+
+            sell_tasks = [
+                self.order_manager.place_order(
                     side="Sell",
                     order_type="Limit",
                     qty=order["quantity"],
                     price=order["price"],
                     time_in_force="GTC"
-                )
+                ) for order in orders.get("sell", [])
+            ]
+
+            # Run all place_order tasks concurrently
+            await asyncio.gather(*(buy_tasks + sell_tasks))
             
             # Update last order time
             self.last_order_time = time.time()
@@ -288,6 +294,7 @@ class PMMApplication:
 
     async def _log_params(self, interval: float = 5.0):
         """Continuously log strategy parameters"""
+        asyncio.sleep(5)
         while True:
             try:
                 spread = self.strategy.spread
@@ -297,6 +304,61 @@ class PMMApplication:
             except Exception as e:
                 self.logger.error(f"Error logging parameters: {e}")
             await asyncio.sleep(interval)
+
+    async def _handle_position_risk(self, interval: float = 5.0):
+        """Continuously monitor position and risk."""
+        self.logger.info('Warm-up: 5 seconds')
+        await asyncio.sleep(5)
+
+        while True:
+            try:
+                if await self.strategy.handle_position_management():
+                    await self.close_position()
+                    self.logger.info("Position management condition met. Closed position.")
+                    return
+
+                if await self.strategy.handle_risk_management():
+                    await self.stop()
+                    self.logger.info("Risk limit breached. Strategy stopped.")
+                    return
+
+            except Exception as e:
+                self.logger.error(f"Error handling position risk: {e}")
+
+            await asyncio.sleep(interval)
+
+    async def close_position(self):
+        """
+        Closes the current open position (only for linear contracts).
+        """
+        if self.category != "linear":
+            return False
+
+        try:
+            positions = await self.rest_client.get_positions(self.category, self.symbol_pair)
+            if not positions:
+                return False
+
+            position = positions[0]
+            side = position["side"].lower()
+            curr_size = float(position.get('size', 0))
+
+            if curr_size == 0:
+                return False
+
+            opposite_side = "Sell" if side == "buy" else "Buy"
+            await self.order_manager.place_order(
+                side=opposite_side,
+                order_type="Market",
+                qty=curr_size,
+                time_in_force="GTC"
+            )
+            self.logger.info(f"Closed {side} position of size {curr_size} with market order.")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Error closing position: {e}")
+            return False
 
 async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: str = "USDT",
                  category: str = "linear", testnet: bool = True, 

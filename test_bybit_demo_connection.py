@@ -51,7 +51,7 @@ async def test_rest_api(api_key, api_secret):
         # logger.info(f"ticker: {ticker}")
         
         # Test get positions
-        positions = await client.get_positions("linear", "OPUSDT")
+        positions = await client.get_positions("linear", "HYPEUSDT")
         logger.info(f"Positions: {positions}")
 
         # # Test wallet balance
@@ -249,5 +249,6 @@ async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit:
 
 
 if __name__ == "__main__":
-    # asyncio.run(fetch_all_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
-    asyncio.run(main())
+    asyncio.run(fetch_all_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
+    # asyncio.run(fetch_all_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
+    # asyncio.run(main())

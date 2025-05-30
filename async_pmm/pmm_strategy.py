@@ -40,7 +40,7 @@ class PMMStrategy:
         # Initialize parameters
         self._init_strategy_params(strategy_params)
         self._init_inventory_params()
-        self._init_risk_management_params() # Not use yet
+        self._init_risk_management_params()
         
         # Market data
         self.ticker_data = {}
@@ -57,15 +57,23 @@ class PMMStrategy:
         self.volatility = 0.0
         self.fair_price = 0.0
         self.old_fair_price = 0.0
+        self.spread = None
+        self.skew = 0.0
+
+        # Order states
+        self.is_buy = True
+        self.is_sell = True
         
+        # Inventory management
         self.inventory_ratio = 0.5  # Neutral position (0.0 = all quote, 1.0 = all base)
-        self.position_normalize = 0.0 # Use for perp
-        self.trade_size = 0.0
+        self.trade_value = 0.0
         self.trade_base_size = 0.0
 
-        self.spread = None
-        self.skew = 0.0000
-        
+        # For perp
+        self.position_normalize = 0.0
+        self.cum_rlzd_pnl = 0.0
+        self.peak = 0.0
+
         # Order tracking
         self.active_orders = {}
         self.last_order_time = 0
@@ -131,29 +139,41 @@ class PMMStrategy:
                 if key in self.params:
                     self.params[key] = value
                     # self.logger.info(f"Overriding parameter {key}: {value}")
-                else:
-                    self.logger.warning(f"Unknown parameter: {key}")
+
     
-    def _init_inventory_params(self):
+    def _init_inventory_params(self, strategy_params: Optional[Dict[str, Any]] = None):
         """Initialize inventory management parameters"""
         self.inventory = {
             "target_ratio": 0.5,        # Target inventory ratio (0.5 = 50% base, 50% quote)
             "base_balance": 0.0,        # Current base asset balance
             "quote_balance": 0.0,       # Current quote asset balance
             "total_value": 0.0,         # Total portfolio value in quote currency
-            "base_trade_size": 50.0,
-            "min_trade_size": 10.0,     # Minimum trade size in quote currency
-            "max_trade_size": 100.0    # Maximum trade size in quote currency
+            "base_trade_value": 50.0,
+            "min_trade_value": 10.0,     # Minimum trade size in quote currency
+            "max_trade_value": 100.0    # Maximum trade size in quote currency
         }
-    
-    def _init_risk_management_params(self):
+        # Override defaults with provided parameters
+        if strategy_params:
+            for key, value in strategy_params.items():
+                if key in self.params:
+                    self.params[key] = value
+                    # self.logger.info(f"Overriding parameter {key}: {value}")
+
+    def _init_risk_management_params(self, strategy_params: Optional[Dict[str, Any]] = None):
         """Initialize risk management parameters"""
         self.risk = {
-            "max_position": 1000.0,     # Maximum position size in quote currency
-            "max_drawdown": 0.05,       # Maximum allowed drawdown (5%)
-            "stop_loss": 0.10,          # Stop loss threshold (10%)
+            "max_position_value": 500.0,  # Maximum position value in quote currency
+            "take_profit_value": 50, # Take profit value
+            "stop_loss_value": 50, # Stop loss value
+            "max_drawdown": 200 # Maximum drawdown in quote currency
         }
-    
+        # Override defaults with provided parameters
+        if strategy_params:
+            for key, value in strategy_params.items():
+                if key in self.params:
+                    self.params[key] = value
+                    # self.logger.info(f"Overriding parameter {key}: {value}")
+
     async def update_market_data(self, ticker: Dict[str, Any] = None, klines: List[Dict[str, Any]] = None, 
                                 order_book: Dict[str, Any] = None, position: Dict[str, Any] = None):
         """
@@ -264,13 +284,13 @@ class PMMStrategy:
         try:
             # Ensure within min/max bounds
             
-            self.trade_size = self.clamp(self.trade_size, self.inventory["min_trade_size"], self.inventory["max_trade_size"])
+            self.trade_value = self.clamp(self.trade_value, self.inventory["min_trade_value"], self.inventory["max_trade_value"])
             
             if self.fair_price == 0:
                 fair_price = await self.compute_fair_price()
-                self.trade_base_size = self.trade_size / fair_price
+                self.trade_base_size = self.trade_value / fair_price
             else:
-                self.trade_base_size = self.trade_size / self.fair_price
+                self.trade_base_size = self.trade_value / self.fair_price
             
         except Exception as e:
             self.logger.error(f"Error updating trade size: {e}")
@@ -353,9 +373,13 @@ class PMMStrategy:
                 self.logger.warning("Cannot generate orders: Invalid fair price")
                 return {"buy": [], "sell": []}
             
-            # Generate orders for both sides
-            buy_orders = await self.generate_orders_for_side("buy", fair_price)
-            sell_orders = await self.generate_orders_for_side("sell", fair_price)
+            buy_task = self.generate_orders_for_side("buy", fair_price) if self.is_buy else None
+            sell_task = self.generate_orders_for_side("sell", fair_price) if self.is_sell else None
+
+            buy_orders, sell_orders = await asyncio.gather(
+                buy_task if buy_task else asyncio.sleep(0),
+                sell_task if sell_task else asyncio.sleep(0)
+            )
             
             if not buy_orders or not sell_orders:
                 self.logger.warning("No orders generated.")
@@ -388,8 +412,8 @@ class PMMStrategy:
             base_price = fair_price * (1 - spread) if is_buy else fair_price * (1 + spread)
             price_step = max(self.spread, self.params["min_spread"])
             size_multiplier = self.params["size_multiplier"]
-            max_trade = self.inventory["max_trade_size"]
-            min_trade = self.inventory["min_trade_size"]
+            max_trade = self.inventory["max_trade_value"]
+            min_trade = self.inventory["min_trade_value"]
 
             tick_size = self.tick_size
             price_scale = self.price_scale
@@ -490,3 +514,70 @@ class PMMStrategy:
                 return True
             
         return False
+    
+    async def handle_position_management(self):
+        """
+        Determine if the bot should handle (i.e., exit) the current position (only for linear contracts).
+
+        Returns:
+            bool: True if take-profit or stop-loss condition is met; otherwise False.
+        """
+        if self.category != "linear":
+            return False
+
+        position = self.position_data[0]
+        if not position:
+            return False
+
+        side = position["side"].lower()
+        curr_position = float(position.get('positionValue', 0))
+        unrlzd_pnl = float(position.get('unrealisedPnl', 0))
+
+        # Adjust trading direction based on position size
+        if abs(curr_position) > self.params["max_position_size"]:
+            if side == 'buy':
+                self.is_buy = False
+            else:
+                self.is_sell = False
+        else:
+            self.is_buy = True
+            self.is_sell = True
+
+        # Check take profit / stop loss conditions
+        if unrlzd_pnl > self.risk['take_profit_value']:
+            self.logger.info(f"Take profit triggered: {unrlzd_pnl}")
+            self.cum_rlzd_pnl += unrlzd_pnl
+            return True
+        elif unrlzd_pnl < self.risk['stop_loss_value']:
+            self.logger.info(f"Stop loss triggered: {unrlzd_pnl}")
+            self.cum_rlzd_pnl += unrlzd_pnl
+            return True
+
+        return False
+
+    async def handle_risk_management(self):
+        """
+        Check if cumulative realized PnL has breached max drawdown threshold (only for linear contracts).
+
+        Returns:
+            bool: True if risk limit breached and strategy should stop; otherwise False.
+        """
+        if self.category != "linear":
+            return False
+
+        # Update peak if new high
+        self.peak = max(self.peak, self.cum_rlzd_pnl)
+
+        # Calculate drawdown
+        drawdown = self.cum_rlzd_pnl - self.peak
+
+        # Check drawdown breach
+        if drawdown <= -self.risk['max_drawdown_value']:
+            self.logger.error(f"Max drawdown exceeded: {drawdown} — Stopping strategy.")
+            return True
+
+        return False
+
+
+            
+

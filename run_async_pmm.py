@@ -32,7 +32,7 @@ STRATEGY_PARAMS = {
     # Order parameters
     "use_imbalance_price": True,   # Use imbalance price for order placement
     "order_count": 1,           # Number of orders on each side
-    "base_spread": 0.0003,
+    "base_spread": 0.0002,
     "min_spread": 0.0001,       # Minimum spread 
     "max_spread": 0.0005,       # Maximum spread 
     "vol_scale": 1,           # Volatility impact on spread
@@ -47,9 +47,15 @@ STRATEGY_PARAMS = {
     "size_multiplier": 2,     # Size multiplier for orders further from mid
 
     # Trade parameters
-    "base_trade_size": 50.0,
-    "min_trade_size": 10.0,     # Minimum trade size in quote currency
-    "max_trade_size": 100.0,    # Maximum trade size in quote currency
+    "base_trade_value": 100.0,
+    "min_trade_value": 100.0,     # Minimum trade size in quote currency
+    "max_trade_value": 100.0,    # Maximum trade size in quote currency
+
+    # Risk management parameters
+    "max_position_value": 500.0,  # Maximum position value in quote currency
+    "take_profit_value": 50, # Take profit value
+    "stop_loss_value": 50, # Stop loss value
+    "max_drawdown": 200 # Maximum drawdown in quote currency
 }
 
 async def request_demo_funds(api_key, api_secret):
