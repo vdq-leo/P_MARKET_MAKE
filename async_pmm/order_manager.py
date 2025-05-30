@@ -2,12 +2,12 @@
 Async Order Manager - Handles order placement, tracking, and execution
 """
 import asyncio
-import logging
 import time
 import uuid
 from typing import Dict, List, Any, Optional, Callable, Set, Tuple
 from datetime import datetime
 
+from logger import setup_logger_global
 from .bybit_rest import BybitRestClient
 from .bybit_websocket import BybitWebSocketClient
 
@@ -47,18 +47,8 @@ class OrderManager:
         self.trade_callbacks: List[Callable[[Dict[str, Any]], None]] = []
         
         # Setup logging
-        self.logger = logging.getLogger(f"order_manager_{symbol}")
-        self.logger.setLevel(logging.INFO)
+        self.logger = setup_logger_global("ORDER_MANAGEMENT", f"order_manager_{symbol}")
 
-        if not self.logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-
-        # Prevent logs from being passed to the root logger
-        self.logger.propagate = False
-        
     async def start(self):
         """Start the order manager"""
         self.processing = True

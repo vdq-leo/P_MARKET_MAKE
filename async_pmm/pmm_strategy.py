@@ -2,13 +2,14 @@
 PMM Strategy Module - Core strategy implementation for market making
 """
 import asyncio
-import logging
 import time
 import numpy as np
 import json
 import math
+import pandas as pd
 from typing import Dict, List, Optional, Tuple, Any, Callable
 from datetime import datetime
+from logger import setup_logger_global
 
 class PMMStrategy:
     """
@@ -29,7 +30,8 @@ class PMMStrategy:
         self.quote = quote
         self.symbol_pair = f"{symbol}{quote}"
         self.category = category
-
+        self.scan_time = int(time.time() * 1000)
+        
         # Initialize clients
         self.rest_client = None
         self.ws_client = None   
@@ -59,6 +61,8 @@ class PMMStrategy:
         self.old_fair_price = 0.0
         self.spread = None
         self.skew = 0.0
+        self.bid = None
+        self.ask = None
 
         # Order states
         self.is_buy = True
@@ -73,6 +77,8 @@ class PMMStrategy:
         self.position_normalize = 0.0
         self.cum_rlzd_pnl = 0.0
         self.peak = 0.0
+        self.unrlzd_pnl = 0.0
+        self.nominal_value = 0.0
 
         # Order tracking
         self.active_orders = {}
@@ -99,17 +105,7 @@ class PMMStrategy:
 
     def _setup_logger(self):
         """Setup strategy logger"""
-        self.logger = logging.getLogger(f"pmm_strategy_{self.symbol}")
-        self.logger.setLevel(logging.INFO)
-        
-        if not self.logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-        
-        # Prevent logs from being passed to the root logger
-        self.logger.propagate = False
+        self.logger = setup_logger_global('PMM_STRATEGY', f"pmm_strategy_{self.symbol_pair}")
     
     def _init_strategy_params(self, strategy_params: Optional[Dict[str, Any]] = None):
         """Initialize strategy parameters with defaults or provided values"""
@@ -254,7 +250,7 @@ class PMMStrategy:
 
                 side = 1 if position["side"].lower() == "buy" else -1 
                 size = float(position["size"])
-                position_normalize = int(size * side / self.trade_base_size)
+                position_normalize = int((size * side) / self.trade_base_size)
                 volatility = self.volatility
 
                 skew = - position_normalize * volatility ** (2 - self.params["skew_factor"])
@@ -263,6 +259,7 @@ class PMMStrategy:
                 self.skew = skew
 
             else:
+                
                 base_value = self.inventory["base_balance"] * self.fair_price
                 total_value = base_value + self.inventory["quote_balance"]
                 
@@ -438,6 +435,12 @@ class PMMStrategy:
 
                 price = round(price, price_scale)
 
+                if i == 0:
+                    if is_buy:
+                        self.bid = price
+                    else:
+                        self.ask = price
+
                 size_base =  self.trade_base_size * (size_multiplier ** i)
                 size_base = self.clamp(size_base, min_trade / price, max_trade / price)
                 size_base = round(size_base, qty_scale)
@@ -540,6 +543,10 @@ class PMMStrategy:
             side = position.get("side", "").lower()
             curr_position = float(position.get("positionValue", 0) or 0)
             unrlzd_pnl = float(position.get("unrealisedPnl", 0) or 0)
+
+            self.unrlzd_pnl = unrlzd_pnl
+            self.nominal_value = curr_position
+
         except (ValueError, TypeError):
             self.logger.warning("Position data malformed.")
             return False
@@ -547,12 +554,10 @@ class PMMStrategy:
         # Take profit or stop loss check
         if unrlzd_pnl >= self.risk["take_profit_value"]:
             self.logger.info(f"Take profit triggered: {unrlzd_pnl}")
-            self.cum_rlzd_pnl += unrlzd_pnl
             return True
 
         elif unrlzd_pnl <= -self.risk["stop_loss_value"]:
             self.logger.info(f"Stop loss triggered: {unrlzd_pnl}")
-            self.cum_rlzd_pnl += unrlzd_pnl
             return True
 
         # Adjust direction based on position size
@@ -593,6 +598,53 @@ class PMMStrategy:
             return True
 
         return False
+
+    async def _pnl_cron_job(self, interval: float = 60.0):
+        """Periodically fetch and update realized PnL."""
+        while True:
+            try:
+                await self.calculate_pnl()
+            except Exception as e:
+                import traceback
+                tb = traceback.extract_tb(e.__traceback__)
+                self.logger.error(f"[CRON_PNL] Exception: {e} at line {tb[-1].lineno}")
+            await asyncio.sleep(interval)
+
+    async def calculate_pnl(self):
+        """Fetch trade history and update cumulative PnL."""
+        all_trades = []
+        cursor = None
+
+        try:
+            while True:
+                params = {"limit": 100, "startTime": self.scan_time}
+                if cursor:
+                    params["cursor"] = cursor
+
+                response = await self.rest_client.get_pnl(self.category, self.symbol_pair, **params)
+                trades = response.get("list", [])
+                if not trades:
+                    break
+
+                all_trades.extend(trades)
+                cursor = response.get("nextPageCursor")
+                if not cursor:
+                    break
+            
+            self.scan_time = int(time.time() * 1000)
+
+            if all_trades:
+                df = pd.DataFrame(all_trades)
+                df["closedPnl"] = pd.to_numeric(df["closedPnl"], errors="coerce").fillna(0)
+                total_pnl = df["closedPnl"].sum()
+                self.cum_rlzd_pnl += total_pnl
+            else:
+                self.logger.info("[PNL] No trades found.")
+
+        except Exception as e:
+            import traceback
+            tb = traceback.extract_tb(e.__traceback__)
+            self.logger.error(f"[PNL] Error: {e} at line {tb[-1].lineno}")
 
 
             

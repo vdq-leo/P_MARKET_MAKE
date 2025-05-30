@@ -3,7 +3,6 @@ Bybit WebSocket Client - Asynchronous implementation using websockets
 """
 import asyncio
 import json
-import logging
 import time
 import hmac
 import hashlib
@@ -12,6 +11,7 @@ import uvloop
 import inspect
 from typing import Dict, List, Any, Callable, Optional, Set
 from urllib.parse import urlencode
+from logger import setup_logger_global
 
 # Set uvloop as the event loop policy
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -80,16 +80,7 @@ class BybitWebSocketClient:
         self.message_queue = asyncio.Queue()
         
         # Setup logging
-        self.logger = logging.getLogger("bybit_websocket")
-        self.logger.setLevel(logging.INFO)
-        if not self.logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-
-        # Prevent logs from being passed to the root logger
-        self.logger.propagate = False
+        self.logger = setup_logger_global("BYBIT_WS", "bybit_websocket")
         
         # Adjust URLs for testnet
         if self.testnet:

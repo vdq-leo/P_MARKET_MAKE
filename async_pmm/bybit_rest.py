@@ -6,10 +6,10 @@ import asyncio
 import hmac
 import hashlib
 import json
-import logging
 import time
 import urllib.parse
 import math
+from logger import setup_logger_global
 from pybit.unified_trading import HTTP
 from typing import Dict, List, Any, Optional, Union, Tuple
 
@@ -50,13 +50,7 @@ class BybitRestClient:
         self.rate_limit_remaining = 0
         
         # Setup logging
-        self.logger = logging.getLogger("bybit_rest")
-        self.logger.setLevel(logging.INFO)
-        if not self.logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
+        self.logger = setup_logger_global("BYBIT_REST", "bybit_rest")
 
         # Prevent logs from being passed to the root logger
         self.logger.propagate = False

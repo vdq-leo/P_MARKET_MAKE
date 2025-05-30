@@ -3,7 +3,6 @@
 Run Async PMM Strategy - Example runner script
 """
 import asyncio
-import logging
 import os
 import sys
 import uvloop
@@ -21,11 +20,6 @@ load_dotenv()
 # Set uvloop as the event loop policy
 uvloop.install()
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 
 # Strategy parameters
 STRATEGY_PARAMS = {

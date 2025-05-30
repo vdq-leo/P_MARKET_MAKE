@@ -2,12 +2,13 @@
 PMM Application - Main application for running the PMM strategy
 """
 import asyncio
-import logging
 import signal
 import time
 import uvloop
+import sys
 from typing import Dict, Any, Optional, List
 
+from logger import setup_logger_global
 from .pmm_strategy import PMMStrategy
 from .bybit_rest import BybitRestClient
 from .bybit_websocket import BybitWebSocketClient
@@ -41,17 +42,7 @@ class PMMApplication:
         self.testnet = testnet
         
         # Setup logging
-        self.logger = logging.getLogger(f"pmm_app")
-        self.logger.setLevel(logging.INFO)
-
-        if not self.logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            self.logger.addHandler(handler)
-
-        # Prevent logs from being passed to the root logger
-        self.logger.propagate = False
+        self.logger = setup_logger_global('PMM_APP',f"pmm_app_{self.symbol_pair}")
         
         # Initialize components
         self.strategy = PMMStrategy(symbol, quote, strategy_params)
@@ -116,6 +107,7 @@ class PMMApplication:
             
             # Start main loop
             self.running = True
+            asyncio.create_task(self.strategy._pnl_cron_job(interval=10.0))
             self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
             self.strategy_task = asyncio.create_task(self._run_strategy_loop(), name="strategy_task")
             
@@ -259,7 +251,7 @@ class PMMApplication:
         """Main strategy loop"""
         self.logger.info("Starting strategy")
 
-        asyncio.create_task(self._log_params(interval = 1))
+        asyncio.create_task(self._log_params(interval = 0.2))
         asyncio.create_task(self._handle_position_risk(interval = 1))
 
         while self.running and not self.stop_event.is_set():
@@ -326,21 +318,62 @@ class PMMApplication:
         except Exception as e:
             self.logger.error(f"Error refreshing orders: {e} {e.__traceback__.tb_lineno}")
 
-    async def _log_params(self, interval: float = 5.0):
-        """Continuously log strategy parameters"""
-        await asyncio.sleep(5)
+    async def _log_params(self, interval: float = 0.2):
+        """Ultra-fast terminal update for strategy parameters."""
+        # ANSI color codes for styling
+        GREEN = "\033[92m"
+        YELLOW = "\033[93m"
+        CYAN = "\033[96m"
+        RED = "\033[91m"
+        RESET = "\033[0m"
+        BOLD = "\033[1m"
+
+        def fmt_num(val, fmt, default_color=RESET):
+            if val is None:
+                return f"{RED}N/A{RESET}"
+            color = RED if val < 0 else default_color
+            return f"{color}{fmt.format(val)}{RESET}"
+
+
+        await asyncio.sleep(1)  # initial delay
+
         while True:
             try:
-                spread = self.strategy.spread
-                skew = self.strategy.skew
-                vol = self.strategy.volatility
-                position_norm = self.strategy.position_normalize
-                is_buy = self.strategy.is_buy
-                is_sell = self.strategy.is_sell
-                self.logger.info(f"Volatility: {vol:.5f} -- Spread: {spread:.5f} -- Skew: {skew:.5f} -- Position: {int(position_norm)}")
-                self.logger.info(f"Buy: {is_buy} -- Sell: {is_sell}")
+                spread = float(self.strategy.spread) if self.strategy.spread is not None else None
+                skew = float(self.strategy.skew) if self.strategy.skew is not None else None
+                vol = float(self.strategy.volatility) if self.strategy.volatility is not None else None
+                position_raw = self.strategy.position_normalize
+                position = position_raw if position_raw is not None else None
+                cum_rlzd_pnl = float(self.strategy.cum_rlzd_pnl) if self.strategy.cum_rlzd_pnl is not None else None
+                unrlzd_pnl = float(self.strategy.unrlzd_pnl) if self.strategy.unrlzd_pnl is not None else None
+                fair_price = float(self.strategy.fair_price) if self.strategy.fair_price is not None else None
+                bid_price = float(self.strategy.bid) if self.strategy.bid is not None else None
+                ask_price = float(self.strategy.ask) if self.strategy.ask is not None else None
+                nominal_value = float(self.strategy.nominal_value) if self.strategy.nominal_value is not None else None
+
+                output = "\033[2J\033[H"  # Clear screen + move cursor to top-left
+                output += f"{BOLD}=== Strategy State ==={RESET}\n\n"
+                
+                output += f"Ask Price      : {fmt_num(ask_price, '{:.5f}', RED)}\n"
+                output += f"Fair Price     : {fmt_num(fair_price, '{:.5f}', CYAN)}\n"
+                output += f"Bid Price      : {fmt_num(bid_price, '{:.5f}', GREEN)}\n\n"
+
+                output += f"Volatility     : {fmt_num((vol * 100) if vol is not None else None, '{:.4f} %', YELLOW)}\n"
+                output += f"Spread         : {fmt_num((spread * 100) if spread is not None else None, '{:.4f} %', YELLOW)}\n"
+                output += f"Skew           : {fmt_num((skew * 100) if skew is not None else None, '{:.4f} %', YELLOW)}\n\n"
+
+                output += f"Position       : {fmt_num(position, '{:d}', CYAN)}\n"
+                output += f"Nominal Value  : {fmt_num(nominal_value, '{:.2f}', CYAN)}\n"
+                output += f"Unrealized PNL : {fmt_num(unrlzd_pnl, '{:.4f}', GREEN)}\n"
+                output += f"Realized PNL   : {fmt_num(cum_rlzd_pnl, '{:.4f}', GREEN)}\n"
+
+                sys.stdout.write(output)
+                sys.stdout.flush()
+
             except Exception as e:
-                self.logger.error(f"Error logging parameters: {e}")
+                sys.stdout.write(f"\nError: {e}\n")
+                sys.stdout.flush()
+
             await asyncio.sleep(interval)
 
     async def _handle_position_risk(self, interval: float = 5.0):
@@ -405,6 +438,7 @@ class PMMApplication:
         except Exception as e:
             self.logger.error(f"Error closing position: {e}")
 
+
 async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: str = "USDT",
                  category: str = "linear", testnet: bool = True, 
                  strategy_params: Optional[Dict[str, Any]] = None):
@@ -420,12 +454,6 @@ async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: st
         testnet: Whether to use testnet
         strategy_params: Optional strategy parameters
     """
-    # Setup logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    logger = logging.getLogger("pmm_runner")
     
     # Create application
     app = PMMApplication(symbol, quote, category, testnet, strategy_params)
@@ -445,7 +473,7 @@ async def run_pmm(api_key: str, api_secret: str, symbol: str = "HYPE", quote: st
             await asyncio.sleep(1)
             
     except Exception as e:
-        logger.error(f"Error running PMM application: {e} {e.__traceback__.tb_lineno}")
+        print(f"Error running PMM application: {e} {e.__traceback__.tb_lineno}")
         
     finally:
         # Ensure application is stopped
