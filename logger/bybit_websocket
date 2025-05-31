@@ -1,15 +1,199 @@
-[2025-05-30 21:10:56,498][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
-[2025-05-30 21:10:56,862][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
-[2025-05-30 21:10:56,863][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
-[2025-05-30 21:10:57,206][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
-[2025-05-30 21:10:57,206][bybit_websocket.py:585][INFO] Subscribed to tickers.OPUSDT
-[2025-05-30 21:10:57,207][bybit_websocket.py:585][INFO] Subscribed to kline.1.OPUSDT
-[2025-05-30 21:10:57,207][bybit_websocket.py:606][INFO] Subscribed to order
-[2025-05-30 21:10:57,207][bybit_websocket.py:606][INFO] Subscribed to execution
-[2025-05-30 21:10:57,266][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
-[2025-05-30 21:10:57,266][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
-[2025-05-30 21:12:13,562][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
-[2025-05-30 21:12:13,563][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
-[2025-05-30 21:12:13,654][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
-[2025-05-30 21:12:13,655][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
-[2025-05-30 21:12:13,655][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 08:53:32,081][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 08:53:32,970][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 08:53:32,970][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 08:53:33,795][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 08:53:33,796][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 08:53:33,796][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 08:53:33,796][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 08:53:33,796][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 08:53:33,997][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 08:53:34,002][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 08:59:00,312][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 08:59:00,313][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 08:59:00,515][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 08:59:00,515][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 08:59:00,516][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 09:02:28,453][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 09:02:29,326][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 09:02:29,326][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 09:02:30,157][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 09:02:30,158][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 09:02:30,158][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 09:02:30,158][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 09:02:30,158][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 09:02:30,361][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 09:02:30,364][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 09:05:05,880][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 09:05:05,880][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 09:05:06,081][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 09:05:06,081][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 09:05:06,081][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 09:05:06,081][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 09:05:10,312][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 09:05:11,184][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 09:05:11,184][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 09:05:12,059][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 09:05:12,060][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 09:05:12,060][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 09:05:12,060][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 09:05:12,060][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 09:05:12,264][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 09:05:12,268][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:19:17,791][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:19:17,791][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:19:17,991][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:19:17,991][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:19:17,991][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:19:17,991][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:19:44,088][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:19:44,965][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:19:44,965][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:19:45,791][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:19:45,792][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:19:45,792][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:19:45,792][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:19:45,792][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:19:45,991][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:19:45,994][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:21:43,131][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:21:43,131][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:21:43,411][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:21:43,411][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:21:43,411][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:21:43,411][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:22:27,057][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:22:27,982][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:22:27,983][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:22:28,807][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:22:28,808][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:22:28,808][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:22:28,808][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:22:28,808][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:22:29,008][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:22:29,012][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:33:02,410][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:33:02,410][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:33:02,609][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:33:02,609][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:33:02,609][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:37:19,253][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:37:19,536][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:37:19,536][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:37:19,754][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:37:19,754][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:37:19,754][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:37:19,755][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:37:19,755][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:37:19,805][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:37:19,808][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:40:48,446][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:40:48,447][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:40:48,496][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:40:48,497][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:40:48,497][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:40:52,260][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:40:52,529][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:40:52,529][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:40:52,747][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:40:52,748][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:40:52,748][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:40:52,748][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:40:52,749][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:40:52,798][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:40:52,803][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:41:35,315][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:41:35,316][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:41:35,364][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:41:35,364][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:41:35,364][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:41:40,466][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:41:40,662][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:41:40,663][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:41:40,888][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:41:40,889][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:41:40,889][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:41:40,890][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:41:40,890][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:41:40,941][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:41:40,944][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:45:28,609][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:45:28,609][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:45:28,657][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:45:28,657][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:45:28,657][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:45:28,658][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:45:32,454][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:45:32,707][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:45:32,708][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:45:32,930][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:45:32,930][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:45:32,930][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:45:32,930][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:45:32,930][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:45:32,979][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:45:32,984][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:51:01,693][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:51:01,693][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:51:01,753][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:51:01,753][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:51:01,753][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:51:20,142][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:51:20,389][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:51:20,389][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:51:20,609][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:51:20,610][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:51:20,610][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:51:20,610][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:51:20,611][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:51:20,661][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:51:20,666][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:52:01,614][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:52:01,614][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:52:01,664][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:52:01,664][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:52:01,664][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:52:06,815][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:52:07,021][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:52:07,022][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:52:07,185][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:52:07,185][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:52:07,185][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:52:07,185][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:52:07,185][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:52:07,234][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:52:07,238][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:56:50,884][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:56:50,885][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:56:50,933][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:56:50,933][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:56:50,933][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:56:54,085][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:56:54,325][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:56:54,326][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:56:54,546][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:56:54,546][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:56:54,546][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:56:54,546][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:56:54,546][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:56:54,595][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:56:54,600][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:58:35,122][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 10:58:35,122][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 10:58:35,171][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 10:58:35,171][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 10:58:35,171][bybit_websocket.py:831][INFO] WebSocket connections closed
+[2025-05-31 10:58:38,879][bybit_websocket.py:161][INFO] Connecting to Bybit private WebSocket...
+[2025-05-31 10:58:39,114][bybit_websocket.py:183][INFO] Connected to Bybit private WebSocket
+[2025-05-31 10:58:39,114][bybit_websocket.py:122][INFO] Connecting to Bybit public WebSocket...
+[2025-05-31 10:58:39,344][bybit_websocket.py:130][INFO] Connected to Bybit public WebSocket
+[2025-05-31 10:58:39,345][bybit_websocket.py:585][INFO] Subscribed to tickers.HYPEUSDT
+[2025-05-31 10:58:39,345][bybit_websocket.py:585][INFO] Subscribed to kline.1.HYPEUSDT
+[2025-05-31 10:58:39,345][bybit_websocket.py:606][INFO] Subscribed to order
+[2025-05-31 10:58:39,345][bybit_websocket.py:606][INFO] Subscribed to execution
+[2025-05-31 10:58:39,394][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 10:58:39,398][bybit_websocket.py:353][ERROR] WebSocket error: Request not authorized
+[2025-05-31 11:02:17,071][bybit_websocket.py:229][WARNING] Public WebSocket connection closed
+[2025-05-31 11:02:17,071][bybit_websocket.py:210][INFO] Reconnecting to public WebSocket in 5 seconds (attempt 1)
+[2025-05-31 11:02:17,121][bybit_websocket.py:249][WARNING] Private WebSocket connection closed
+[2025-05-31 11:02:17,121][bybit_websocket.py:210][INFO] Reconnecting to private WebSocket in 10 seconds (attempt 2)
+[2025-05-31 11:02:17,121][bybit_websocket.py:831][INFO] WebSocket connections closed

@@ -1,9 +1,0 @@
-[2025-05-30 21:10:56,205][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
-[2025-05-30 21:10:56,206][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
-[2025-05-30 21:10:57,346][pmm_app.py:209][INFO] Initial market data fetched
-[2025-05-30 21:10:57,346][pmm_app.py:252][INFO] Starting strategy
-[2025-05-30 21:10:57,346][pmm_app.py:381][INFO] Warm-up: 5 seconds
-[2025-05-30 21:12:12,901][pmm_app.py:121][INFO] Stopping PMM application...
-[2025-05-30 21:12:13,387][pmm_app.py:121][INFO] Stopping PMM application...
-[2025-05-30 21:12:13,448][pmm_app.py:151][INFO] Task position_task cancelled
-[2025-05-30 21:12:13,656][pmm_app.py:175][INFO] PMM application stopped successfully.

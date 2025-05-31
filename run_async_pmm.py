@@ -28,27 +28,27 @@ STRATEGY_PARAMS = {
     "order_count": 1,           # Number of orders on each side
     "base_spread": 0.0002,
     "min_spread": 0.0001,       # Minimum spread 
-    "max_spread": 0.0010,       # Maximum spread 
-    "vol_scale": 1,           # Volatility impact on spread
-    "skew_factor": 0.5,           # Inventory skew impact
+    "max_spread": 0.0006,       # Maximum spread 
+    "vol_scale": 0.8,           # Volatility impact on spread
+    "skew_factor": 0.6,           # Inventory skew impact
     "refresh_time": 1,          # Order refresh time in seconds
     
     # Volatility parameters
     "use_dynamic_vol": True,    # Use dynamic volatility
-    "vol_window": 5,           # Window for volatility calculation
+    "vol_window": 10,           # Window for volatility calculation
     
     # Order distribution
     "size_multiplier": 2,     # Size multiplier for orders further from mid
 
     # Trade parameters
-    "base_trade_value": 100.0,
-    "min_trade_value": 100.0,     # Minimum trade size in quote currency
+    "base_trade_value": 50.0,
+    "min_trade_value": 10.0,     # Minimum trade size in quote currency
     "max_trade_value": 100.0,    # Maximum trade size in quote currency
 
     # Risk management parameters
-    "max_position_value": 500.0,  # Maximum position value in quote currency
-    "take_profit_value": 50, # Take profit value
-    "stop_loss_value": 50, # Stop loss value
+    "max_position_value": 1000.0,  # Maximum position value in quote currency
+    "take_profit_value": 10, # Take profit value
+    "stop_loss_value": 10, # Stop loss value
     "max_drawdown_value": 200 # Maximum drawdown in quote currency
 }
 
@@ -97,7 +97,7 @@ async def main():
     await run_pmm(
         api_key=api_key,
         api_secret=api_secret,
-        symbol="OP",
+        symbol="HYPE",
         quote="USDT",
         category="linear",
         testnet=True,  # Not using testnet, using demo API directly

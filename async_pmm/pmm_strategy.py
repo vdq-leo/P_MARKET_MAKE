@@ -55,6 +55,7 @@ class PMMStrategy:
         self.scan_time = int(time.time() * 1000)
         
         # Initialize clients
+        self._market_metrics_initialized = False
         self.rest_client = None
         self.ws_client = None   
         
@@ -63,8 +64,8 @@ class PMMStrategy:
         
         # Initialize parameters
         self._init_strategy_params(strategy_params)
-        self._init_inventory_params()
-        self._init_risk_management_params()
+        self._init_inventory_params(strategy_params)
+        self._init_risk_management_params(strategy_params)
         
         # Market data
         self.ticker_data = {}
@@ -173,8 +174,8 @@ class PMMStrategy:
         # Override defaults with provided parameters
         if strategy_params:
             for key, value in strategy_params.items():
-                if key in self.params:
-                    self.params[key] = value
+                if key in self.inventory:
+                    self.inventory[key] = value
                     # self.logger.info(f"Overriding parameter {key}: {value}")
 
     def _init_risk_management_params(self, strategy_params: Optional[Dict[str, Any]] = None):
@@ -188,8 +189,8 @@ class PMMStrategy:
         # Override defaults with provided parameters
         if strategy_params:
             for key, value in strategy_params.items():
-                if key in self.params:
-                    self.params[key] = value
+                if key in self.risk:
+                    self.risk[key] = value
                     # self.logger.info(f"Overriding parameter {key}: {value}")
 
     async def update_market_data(self, ticker: Dict[str, Any] = None, klines: List[Dict[str, Any]] = None, 
@@ -213,9 +214,24 @@ class PMMStrategy:
 
         if position:
             self.position_data = position
-            
-        # Update derived metrics
-        await self.update_market_metrics()
+
+        if not self._market_metrics_initialized:
+            await self.update_market_metrics()
+            self._market_metrics_initialized = True
+
+    async def _cron_update_metrics(self, interval: float = 1.0):
+        """
+        Run market metrics update periodically like a cron job.
+
+        Args:
+            interval: Seconds between each update
+        """
+        while True:
+            try:
+                await self.update_market_metrics()
+            except Exception as e:
+                self.logger.error(f"Cron job error in update_market_metrics: {e}")
+            await asyncio.sleep(interval)
     
     async def update_market_metrics(self):
         """Update market metrics based on latest data"""
@@ -263,6 +279,10 @@ class PMMStrategy:
             skew_factor = self.params["skew_factor"]
 
             if self.category == "linear":
+
+                if not self.position_data:
+                    return self.skew
+                
                 position = self.position_data[0]
 
                 side = 1 if position["side"].lower() == "buy" else -1
@@ -278,9 +298,10 @@ class PMMStrategy:
 
                 # Skew logic: more inventory → less aggressive on that side
                 skew = -position_normalized * (volatility ** (2 - skew_factor))
+                spread = self.spread
 
                 self.position_normalize = position_normalized
-                self.skew = skew
+                self.skew = self.clamp(skew, -spread, spread)
 
             else:
                 # Spot-based inventory skew
@@ -317,8 +338,8 @@ class PMMStrategy:
         try:
             # Ensure within min/max bounds
             
-            self.trade_value = self.clamp(self.trade_value, self.inventory["min_trade_value"], self.inventory["max_trade_value"])
-            
+            self.trade_value = self.inventory['base_trade_value']      
+                  
             if self.fair_price == 0:
                 fair_price = await self.compute_fair_price()
                 self.trade_base_size = self.trade_value / fair_price
@@ -336,10 +357,10 @@ class PMMStrategy:
             Updated spread value (e.g., 0.001 for 0.1%)
         """
         try:
-            base_spread = float(self.params.get("base_spread", 0.001))
-            vol_scale = float(self.params.get("vol_scale", 1.0))
-            min_spread = float(self.params.get("min_spread", 0.0001))
-            use_dynamic = self.params.get("use_dynamic_vol", False)
+            base_spread = float(self.params.get("base_spread"))
+            vol_scale = float(self.params.get("vol_scale"))
+            min_spread = float(self.params.get("min_spread"))
+            use_dynamic = self.params.get("use_dynamic_vol")
 
             # Default to base spread if no volatility adjustment is needed
             if not use_dynamic:
@@ -398,7 +419,7 @@ class PMMStrategy:
             # Add inventory skew if available and valid
             skew = self.skew if isinstance(self.skew, (float, int)) else 0.0
 
-            fair_price = fair_price_ + skew
+            fair_price = fair_price_ * (1 + skew)
             self.fair_price = fair_price
 
             return fair_price
@@ -416,6 +437,8 @@ class PMMStrategy:
         """
         try:
             # Ensure we have a valid fair price
+            is_buy = self.is_buy
+            is_sell = self.is_sell
             fair_price = await self.compute_fair_price()
 
             if fair_price is None or fair_price <= 0:
@@ -425,8 +448,8 @@ class PMMStrategy:
             tasks = []
 
             # Append in order, preserving position for unpacking
-            tasks.append(self.generate_orders_for_side("buy", fair_price) if self.is_buy else asyncio.sleep(0))
-            tasks.append(self.generate_orders_for_side("sell", fair_price) if self.is_sell else asyncio.sleep(0))
+            tasks.append(self.generate_orders_for_side("buy", fair_price) if is_buy else asyncio.sleep(0))
+            tasks.append(self.generate_orders_for_side("sell", fair_price) if is_sell else asyncio.sleep(0))
 
             buy_orders, sell_orders = await asyncio.gather(*tasks)
             
@@ -592,29 +615,33 @@ class PMMStrategy:
             side = position.get("side", "").lower()
             curr_position = float(position.get("positionValue", 0) or 0)
             unrlzd_pnl = float(position.get("unrealisedPnl", 0) or 0)
+            side_ = 1 if side == "buy" else -1
 
             self.unrlzd_pnl = unrlzd_pnl
-            self.nominal_value = curr_position
+            self.nominal_value = curr_position * side_
 
         except (ValueError, TypeError):
             self.logger.warning("Position data malformed.")
             return False
 
         # Take profit or stop loss check
-        if unrlzd_pnl >= self.risk["take_profit_value"]:
+        if unrlzd_pnl >= float(self.risk["take_profit_value"]):
             self.logger.info(f"Take profit triggered: {unrlzd_pnl}")
+            self.cum_rlzd_pnl += unrlzd_pnl
             return True
 
-        elif unrlzd_pnl <= -self.risk["stop_loss_value"]:
+        elif unrlzd_pnl <= -float(self.risk["stop_loss_value"]):
             self.logger.info(f"Stop loss triggered: {unrlzd_pnl}")
+            self.cum_rlzd_pnl += unrlzd_pnl
             return True
 
         # Adjust direction based on position size
-        over_limit = abs(curr_position) > self.risk["max_position_value"]
+        over_limit = abs(curr_position) >= float(self.risk["max_position_value"])
         if over_limit:
             if side == "buy":
                 self.is_buy = False
                 self.is_sell = True
+                
             elif side == "sell":
                 self.is_sell = False
                 self.is_buy = True
@@ -685,8 +712,9 @@ class PMMStrategy:
                 df["closedPnl"] = pd.to_numeric(df["closedPnl"], errors="coerce").fillna(0)
                 total_pnl = df["closedPnl"].sum()
                 self.cum_rlzd_pnl += total_pnl
-                self.logger.info(f"[PNL] updated: {total_pnl}" )
                 self.scan_time = int(time.time() * 1000)
+                self.logger.info(f"[PNL] Updated: {total_pnl} | Cumulative: {self.cum_rlzd_pnl}" )
+
             else:
                 self.logger.info("[PNL] No trades found.")
 

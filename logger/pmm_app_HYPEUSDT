@@ -1,0 +1,305 @@
+[2025-05-31 08:53:31,261][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 08:53:31,261][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 08:53:34,214][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 08:53:34,216][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 08:53:34,217][pmm_app.py:384][INFO] Warm-up: 5 seconds
+[2025-05-31 08:55:01,775][pmm_app.py:434][INFO] Attempt 1: Placed market order to close buy position of size 110.85
+[2025-05-31 08:55:02,984][pmm_app.py:391][INFO] Position management condition met. Closed position.
+[2025-05-31 08:58:59,292][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 08:58:59,503][pmm_app.py:434][INFO] Attempt 1: Placed market order to close sell position of size 13.98
+[2025-05-31 08:58:59,693][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 08:58:59,904][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 08:59:00,516][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 09:02:27,630][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 09:02:27,630][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 09:02:30,585][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 09:02:30,586][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 09:02:30,586][pmm_app.py:389][INFO] Warm-up: 5 seconds
+[2025-05-31 09:04:11,172][pmm_app.py:439][INFO] Attempt 1: Placed market order to close buy position of size 78.19
+[2025-05-31 09:04:12,384][pmm_app.py:396][INFO] Position management condition met. Closed position.
+[2025-05-31 09:05:04,283][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 09:05:04,493][pmm_app.py:439][INFO] Attempt 1: Placed market order to close sell position of size 1.56
+[2025-05-31 09:05:04,995][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 09:05:05,312][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 09:05:05,704][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 09:05:06,081][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 09:05:06,081][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 09:05:09,480][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 09:05:09,480][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 09:05:12,484][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 09:05:12,485][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 09:05:12,486][pmm_app.py:389][INFO] Warm-up: 5 seconds
+[2025-05-31 09:05:25,962][pmm_app.py:439][INFO] Attempt 1: Placed market order to close sell position of size 106.28
+[2025-05-31 09:05:27,173][pmm_app.py:396][INFO] Position management condition met. Closed position.
+[2025-05-31 10:19:15,953][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:19:15,985][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:19:16,164][pmm_app.py:439][INFO] Attempt 1: Placed market order to close buy position of size 356.28
+[2025-05-31 10:19:16,220][pmm_app.py:439][INFO] Attempt 1: Placed market order to close buy position of size 356.28
+[2025-05-31 10:19:17,386][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:19:17,435][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:19:17,991][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:19:17,992][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:19:43,149][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:19:43,149][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:19:46,209][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:19:46,210][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:19:46,211][pmm_app.py:389][INFO] Warm-up: 5 seconds
+[2025-05-31 10:20:40,723][pmm_app.py:439][INFO] Attempt 1: Placed market order to close buy position of size 90.4
+[2025-05-31 10:20:41,931][pmm_app.py:396][INFO] Position management condition met. Closed position.
+[2025-05-31 10:21:41,714][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:21:41,921][pmm_app.py:439][INFO] Attempt 1: Placed market order to close sell position of size 3.2
+[2025-05-31 10:21:42,517][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:21:42,727][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:21:43,129][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:21:43,411][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:21:43,411][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:22:26,242][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:22:26,242][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:22:29,220][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:22:29,221][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:22:29,222][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:26:20,842][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 184.1
+[2025-05-31 10:26:22,052][pmm_app.py:397][INFO] Position management condition met. Closed position.
+[2025-05-31 10:33:01,075][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:33:01,285][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 15.85
+[2025-05-31 10:33:01,794][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:33:02,001][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:33:02,609][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:37:19,031][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:37:19,031][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:37:19,865][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:37:19,867][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:37:19,867][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:38:21,206][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:22,206][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:23,207][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:24,207][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:25,208][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:26,213][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:27,215][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:28,215][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:29,215][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:30,216][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:31,217][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:32,217][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:33,218][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:34,219][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:35,219][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:36,220][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:37,220][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:38,220][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:39,221][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:40,223][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:41,224][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:42,226][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:43,227][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:44,228][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:45,229][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:46,230][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:47,231][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:48,231][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:49,232][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:50,233][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:51,233][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:52,235][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:53,237][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:54,238][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:55,239][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:56,239][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:57,239][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:58,241][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:38:59,241][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:00,241][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:01,242][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:02,243][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:03,245][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:04,246][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:05,247][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:06,248][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:07,250][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:08,251][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:09,252][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:10,254][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:11,258][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:12,259][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:13,259][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:14,261][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:15,262][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:16,265][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:17,265][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:18,266][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:19,267][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:20,268][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:21,268][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:22,269][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:23,270][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:24,271][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:25,273][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:26,273][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:27,274][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:28,276][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:29,278][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:30,279][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:31,281][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:32,282][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:33,282][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:34,284][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:35,284][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:36,286][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:37,286][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:38,288][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:39,289][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:40,291][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:41,291][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:42,294][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:43,295][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:44,296][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:45,298][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:46,299][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:47,301][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:48,302][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:49,303][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:50,305][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:51,306][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:52,307][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:53,308][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:54,309][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:55,310][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:56,311][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:57,312][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:58,313][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:39:59,313][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:00,314][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:01,316][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:02,318][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:03,319][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:04,321][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:05,322][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:06,323][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:07,324][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:08,325][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:09,327][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:10,329][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:11,331][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:12,333][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:13,334][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:14,336][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:15,337][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:16,338][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:17,339][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:18,339][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:19,341][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:20,342][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:21,343][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:22,344][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:23,344][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:24,344][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:25,344][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:26,344][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:27,346][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:28,346][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:29,348][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:30,349][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:31,349][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:32,350][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:33,350][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:34,351][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:35,352][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:36,353][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:37,354][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:38,355][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:39,357][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:40,358][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:41,360][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:42,361][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:43,362][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:44,364][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:45,365][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:46,366][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:47,366][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:47,731][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:40:47,797][pmm_app.py:438][INFO] Attempt 1: Placed market order to close sell position of size 287.28
+[2025-05-31 10:40:48,278][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:40:48,337][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:40:48,366][pmm_app.py:404][ERROR] Error handling position risk: 'PMMStrategy' object has no attribute 'realized_pnl'
+[2025-05-31 10:40:48,498][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:40:52,056][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:40:52,056][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:40:52,855][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:40:52,857][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:40:52,857][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:41:34,791][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:41:34,846][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 3.18
+[2025-05-31 10:41:35,145][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:41:35,200][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:41:35,365][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:41:40,257][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:41:40,257][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:41:41,004][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:41:41,006][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:41:41,006][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:43:18,525][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 193.64
+[2025-05-31 10:43:19,736][pmm_app.py:438][INFO] Attempt 2: Placed market order to close buy position of size 193.64
+[2025-05-31 10:43:21,409][pmm_app.py:438][INFO] Attempt 3: Placed market order to close sell position of size 1.59
+[2025-05-31 10:43:22,616][pmm_app.py:397][INFO] Position management condition met. Closed position.
+[2025-05-31 10:45:27,379][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:45:27,379][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:45:27,446][pmm_app.py:438][INFO] Attempt 1: Placed market order to close sell position of size 7.94
+[2025-05-31 10:45:27,448][pmm_app.py:438][INFO] Attempt 1: Placed market order to close sell position of size 7.94
+[2025-05-31 10:45:28,504][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:45:28,507][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:45:28,658][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:45:28,658][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:45:32,233][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:45:32,233][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:45:33,042][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:45:33,043][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:45:33,044][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:49:35,538][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 285.78
+[2025-05-31 10:49:36,597][pmm_app.py:397][INFO] Position management condition met. Closed position.
+[2025-05-31 10:51:01,115][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:51:01,173][pmm_app.py:438][INFO] Attempt 1: Placed market order to close sell position of size 28.42
+[2025-05-31 10:51:01,531][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:51:01,590][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:51:01,754][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:51:19,928][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:51:19,928][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:51:20,721][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:51:20,723][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:51:20,723][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:52:00,643][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:52:00,703][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 24.94
+[2025-05-31 10:52:01,451][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:52:01,509][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:52:01,664][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:52:06,609][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:52:06,609][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:52:07,296][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:52:07,298][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:52:07,298][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:56:50,406][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:56:50,466][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 25.26
+[2025-05-31 10:56:50,722][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:56:50,779][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:56:50,935][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:56:53,867][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:56:53,867][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:56:54,659][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:56:54,659][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:56:54,659][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 10:58:34,512][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:58:34,568][pmm_app.py:438][INFO] Attempt 1: Placed market order to close sell position of size 19.12
+[2025-05-31 10:58:34,957][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 10:58:35,014][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 10:58:35,171][pmm_app.py:178][INFO] PMM application stopped successfully.
+[2025-05-31 10:58:38,671][pmm_app.py:60][INFO] Initialized PMM application for HYPEUSDT
+[2025-05-31 10:58:38,671][pmm_app.py:71][INFO] Starting PMM application for HYPEUSDT
+[2025-05-31 10:58:39,454][pmm_app.py:212][INFO] Initial market data fetched
+[2025-05-31 10:58:39,455][pmm_app.py:255][INFO] Starting strategy
+[2025-05-31 10:58:39,455][pmm_app.py:390][INFO] Warm-up: 5 seconds
+[2025-05-31 11:02:15,973][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 11:02:16,030][pmm_app.py:438][INFO] Attempt 1: Placed market order to close buy position of size 3.15
+[2025-05-31 11:02:16,905][pmm_app.py:124][INFO] Stopping PMM application...
+[2025-05-31 11:02:16,965][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 11:02:17,089][pmm_app.py:154][INFO] Task position_task cancelled
+[2025-05-31 11:02:17,121][pmm_app.py:178][INFO] PMM application stopped successfully.

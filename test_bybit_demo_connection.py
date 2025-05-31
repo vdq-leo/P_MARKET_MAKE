@@ -8,6 +8,7 @@ import os
 import sys
 import uvloop
 import csv
+from typing import Optional
 from dotenv import load_dotenv
 from typing import Dict, Any
 
@@ -202,7 +203,7 @@ async def fetch_all_trade_history_to_csv(category: str, symbol: str, filename: s
         tb = traceback.extract_tb(e.__traceback__)
         logger.error(f"Error getting trade history: {e} at line {tb[-1].lineno}")
 
-async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit: int = 100):
+async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit: int = 100, startDate: Optional[int] = None, endDate: Optional[int] = None):
     api_key = os.getenv("BYBIT_API_KEY")
     api_secret = os.getenv("BYBIT_API_SECRET")
     client = BybitRestClient(api_key, api_secret)
@@ -212,7 +213,7 @@ async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit:
 
     try:
         while True:
-            trade_hist_params: Dict[str, Any] = {"limit": limit}
+            trade_hist_params: Dict[str, Any] = {"limit": limit, "startDate": startDate, "endDate": endDate}
             if cursor:
                 trade_hist_params["cursor"] = cursor
 
@@ -249,6 +250,6 @@ async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit:
 
 
 if __name__ == "__main__":
-    asyncio.run(fetch_all_pnl_to_csv("linear", "OPUSDT", "pnl_history.csv", 100))
-    asyncio.run(fetch_all_trade_history_to_csv("linear", "OPUSDT", "trade_history.csv", 100))
+    asyncio.run(fetch_all_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
+    asyncio.run(fetch_all_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
     # asyncio.run(main())

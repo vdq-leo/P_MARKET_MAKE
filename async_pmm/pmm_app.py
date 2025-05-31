@@ -107,7 +107,10 @@ class PMMApplication:
             
             # Start main loop
             self.running = True
-            asyncio.create_task(self.strategy._pnl_cron_job(interval=10.0))
+
+            asyncio.create_task(self.strategy._pnl_cron_job(interval=5.0))
+            asyncio.create_task(self.strategy._cron_update_metrics(interval=5.0))
+            
             self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
             self.strategy_task = asyncio.create_task(self._run_strategy_loop(), name="strategy_task")
             
@@ -252,7 +255,7 @@ class PMMApplication:
         self.logger.info("Starting strategy")
 
         asyncio.create_task(self._log_params(interval = 0.2))
-        asyncio.create_task(self._handle_position_risk(interval = 1))
+        asyncio.create_task(self._handle_position_risk(interval = 0.2))
 
         while self.running and not self.stop_event.is_set():
             try:
@@ -339,6 +342,8 @@ class PMMApplication:
 
         while True:
             try:
+                is_buy = self.strategy.is_buy
+                is_sell = self.strategy.is_sell
                 spread = float(self.strategy.spread) if self.strategy.spread is not None else None
                 skew = float(self.strategy.skew) if self.strategy.skew is not None else None
                 vol = float(self.strategy.volatility) if self.strategy.volatility is not None else None
@@ -347,25 +352,29 @@ class PMMApplication:
                 cum_rlzd_pnl = float(self.strategy.cum_rlzd_pnl) if self.strategy.cum_rlzd_pnl is not None else None
                 unrlzd_pnl = float(self.strategy.unrlzd_pnl) if self.strategy.unrlzd_pnl is not None else None
                 fair_price = float(self.strategy.fair_price) if self.strategy.fair_price is not None else None
-                bid_price = float(self.strategy.bid) if self.strategy.bid is not None else None
-                ask_price = float(self.strategy.ask) if self.strategy.ask is not None else None
+                bid_price = float(self.strategy.bid) if (self.strategy.bid is not None and is_buy) else None
+                ask_price = float(self.strategy.ask) if (self.strategy.ask is not None and is_sell) else None
                 nominal_value = float(self.strategy.nominal_value) if self.strategy.nominal_value is not None else None
 
                 output = "\033[2J\033[H"  # Clear screen + move cursor to top-left
                 output += f"{BOLD}=== Strategy State ==={RESET}\n\n"
                 
-                output += f"Ask Price      : {fmt_num(ask_price, '{:.5f}', RED)}\n"
-                output += f"Fair Price     : {fmt_num(fair_price, '{:.5f}', CYAN)}\n"
-                output += f"Bid Price      : {fmt_num(bid_price, '{:.5f}', GREEN)}\n\n"
+                output += f"Position        : {fmt_num(int(position), '{:d}', CYAN)}\n"
+                output += f"Nominal Value   : {fmt_num(nominal_value, '{:.2f}', CYAN)}\n\n"
+                
+                output += f"Is Buy          : {BOLD}{is_buy}{RESET}\n"
+                output += f"Is Sell         : {BOLD}{is_sell}{RESET}\n\n"
 
-                output += f"Volatility     : {fmt_num((vol * 100) if vol is not None else None, '{:.4f} %', YELLOW)}\n"
-                output += f"Spread         : {fmt_num((spread * 100) if spread is not None else None, '{:.4f} %', YELLOW)}\n"
-                output += f"Skew           : {fmt_num((skew * 100) if skew is not None else None, '{:.4f} %', YELLOW)}\n\n"
+                output += f"Ask Price       : {fmt_num(ask_price, '{:.5f}', RED)}\n"
+                output += f"Fair Price      : {fmt_num(fair_price, '{:.5f}', CYAN)}\n"
+                output += f"Bid Price       : {fmt_num(bid_price, '{:.5f}', GREEN)}\n\n"
 
-                output += f"Position       : {fmt_num(position, '{:d}', CYAN)}\n"
-                output += f"Nominal Value  : {fmt_num(nominal_value, '{:.2f}', CYAN)}\n"
-                output += f"Unrealized PNL : {fmt_num(unrlzd_pnl, '{:.4f}', GREEN)}\n"
-                output += f"Realized PNL   : {fmt_num(cum_rlzd_pnl, '{:.4f}', GREEN)}\n"
+                output += f"Volatility      : {fmt_num((vol * 100) if vol is not None else None, '{:.4f} %', YELLOW)}\n"
+                output += f"Spread          : {fmt_num((spread * 100) if spread is not None else None, '{:.4f} %', YELLOW)}\n"
+                output += f"Skew            : {fmt_num((skew * 100) if skew is not None else None, '{:.4f} %', YELLOW)}\n\n"
+
+                output += f"Unrealized PNL  : {fmt_num(unrlzd_pnl, '{:.4f}', GREEN)}\n"
+                output += f"Realized PNL    : {fmt_num(cum_rlzd_pnl, '{:.4f}', GREEN)}\n\n"
 
                 sys.stdout.write(output)
                 sys.stdout.flush()
@@ -386,12 +395,10 @@ class PMMApplication:
                 if await self.strategy.handle_position_management():
                     await self.close_position()
                     self.logger.info("Position management condition met. Closed position.")
-                    return
 
                 if await self.strategy.handle_risk_management():
                     await self.stop()
                     self.logger.info("Risk limit breached. Strategy stopped.")
-                    return
 
             except Exception as e:
                 self.logger.error(f"Error handling position risk: {e}")
@@ -428,7 +435,7 @@ class PMMApplication:
                     time_in_force="GTC",
                     reduce_only=True
                 )
-                # self.logger.info(f"Attempt {attempt+1}: Placed market order to close {side} position of size {curr_size}")
+                self.logger.info(f"Attempt {attempt+1}: Placed market order to close {side} position of size {curr_size}")
 
                 # Wait a short period to allow the order to fill and position to update
                 await asyncio.sleep(1)
