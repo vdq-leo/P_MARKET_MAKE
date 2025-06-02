@@ -4,34 +4,11 @@ PMM Strategy Module - Core strategy implementation for market making
 import asyncio
 import time
 import numpy as np
-from numba import njit
 import math
 import pandas as pd
+from .numba_compute import *
 from typing import Dict, List, Optional, Tuple, Any, Callable
-from datetime import datetime
 from logger import setup_logger_global
-
-@njit
-def compute_volatility(log_closes: np.ndarray, window: int) -> float:
-    n = log_closes.size
-    if n < window + 1:
-        return 0.0
-
-    # Compute returns from log prices (log-return = log(P_t / P_{t-1}))
-    returns = log_closes[n - window - 1 : n]  # last (window+1) values
-    sum_sq = 0.0
-    sum_ret = 0.0
-
-    for i in range(1, window + 1):
-        r = returns[i] - returns[i - 1]
-        sum_ret += r
-        sum_sq += r * r
-
-    mean_ret = sum_ret / window
-    variance = (sum_sq - window * mean_ret * mean_ret) / window  # Bessel's correction not used
-    vol = np.sqrt(variance) * np.sqrt(window)
-
-    return vol
 
 class PMMStrategy:
     """
@@ -81,16 +58,19 @@ class PMMStrategy:
         # Strategy state
         self.spread = self.params["base_spread"]
         self.volatility = 0.0
+        self.atr = 0.0
         self.fair_price = 0.0
         self.old_fair_price = 0.0
         self.skew = 0.0
+
         self.bid = None
         self.ask = None
 
         # Order states
-        self.is_buy = True
-        self.is_sell = True
-        
+        self.is_buy = False
+        self.is_sell = False
+        self.tight_regime = True
+
         # Inventory management
         self.inventory_ratio = 0.5  # Neutral position (0.0 = all quote, 1.0 = all base)
         self.trade_value = 0.0
@@ -108,10 +88,6 @@ class PMMStrategy:
         self.last_order_time = 0
         
         self.logger.info(f"Initialized PMM strategy for {self.symbol_pair}")
-    
-    @staticmethod
-    def clamp(value, min_value, max_value):
-        return max(min(value, max_value), min_value)
 
     async def set_scale(self):
         scale = await self.rest_client.get_scale(self.category, self.symbol_pair)
@@ -136,7 +112,7 @@ class PMMStrategy:
         self.params = {
             # Order parameters
             "use_imbalance_price": True,  # Use imbalance price
-            "order_count": 3,           # Number of orders on each side
+            "order_count": 1,           # Number of orders on each side
             "base_spread": 0.0020,
             "min_spread": 0.0010,       # Minimum spread (0.2%)
             "max_spread": 0.0050,       # Maximum spread (0.5%)
@@ -145,9 +121,10 @@ class PMMStrategy:
             "refresh_time": 60,         # Order refresh time in seconds
             
             # Volatility parameters
-            "use_dynamic_vol": True,
+            "use_dynamic_vol": True,    # Use dynamic volatility
             "vol_window": 10,           # Window for volatility calculation
-            
+            "vol_threshold": 0.0005,          # Tolerance for regime detection    
+
             # Order distribution
             "size_multiplier": 1,     # Size multiplier for orders further from mid
         }
@@ -217,6 +194,7 @@ class PMMStrategy:
 
         if not self._market_metrics_initialized:
             await self.update_market_metrics()
+
             self._market_metrics_initialized = True
 
     async def _cron_update_metrics(self, interval: float = 1.0):
@@ -236,6 +214,7 @@ class PMMStrategy:
     async def update_market_metrics(self):
         """Update market metrics based on latest data"""
         await asyncio.gather(
+            self.update_regime(),
             self.update_volatility(),
             self.update_inventory_skew(),
             self.update_trade_size(),
@@ -268,6 +247,28 @@ class PMMStrategy:
             self.logger.error(f"Error calculating volatility: {e}")
             return self.volatility
 
+    async def update_regime(self):
+        """
+        Determine market regime (trend vs mean-reversion) based on a normalized,
+        smoothed Volatility/ATR ratio over a rolling window using Numba-accelerated logic.
+        """
+        volatility = self.volatility
+        volatility_threshold = self.params["vol_threshold"]
+        if not volatility:
+            return self.tight_regime
+
+        try:
+            if volatility >= volatility_threshold:
+                self.tight_regime = False
+            else:
+                self.tight_regime = True
+
+            return self.tight_regime
+        
+        except Exception as e:
+            self.logger.exception(f"Error calculating regime: {e}")
+            return self.tight_regime
+        
     async def update_inventory_skew(self) -> float:
         """
         Update inventory ratio and compute inventory-based skew
@@ -294,14 +295,14 @@ class PMMStrategy:
                 base_unit = self.trade_base_size
                 volatility = self.volatility or 0.00001  # avoid zero
 
-                position_normalized = int((size * side) / base_unit)
+                position_normalized = int(size / base_unit) * side
 
                 # Skew logic: more inventory → less aggressive on that side
-                skew = -position_normalized * (volatility ** (2 - skew_factor))
+                skew = - position_normalized * (volatility ** (2 - skew_factor))
                 spread = self.spread
 
                 self.position_normalize = position_normalized
-                self.skew = self.clamp(skew, -spread, spread)
+                self.skew = clamp(skew, -spread, spread)
 
             else:
                 # Spot-based inventory skew
@@ -360,19 +361,19 @@ class PMMStrategy:
             base_spread = float(self.params.get("base_spread"))
             vol_scale = float(self.params.get("vol_scale"))
             min_spread = float(self.params.get("min_spread"))
+            max_spread = float(self.params.get("max_spread"))
             use_dynamic = self.params.get("use_dynamic_vol")
+            tight_regime = self.tight_regime
 
             # Default to base spread if no volatility adjustment is needed
-            if not use_dynamic:
+            if not use_dynamic or tight_regime:
                 self.spread = base_spread
                 return self.spread
             
             # Compute dynamic spread
             vol = self.volatility or 0.0
-            dynamic_spread = base_spread + max(vol * vol_scale * 0.5, 0.0)
-
-            # Enforce a floor
-            dynamic_spread = max(dynamic_spread, min_spread)
+            dynamic_spread = base_spread + 0.5 * vol * vol_scale
+            dynamic_spread = clamp(dynamic_spread, min_spread, max_spread)
 
             # Update only if significantly different
             if abs(dynamic_spread - self.spread) > 1e-6:
@@ -384,7 +385,7 @@ class PMMStrategy:
         except Exception as e:
             self.logger.error(f"Error updating spread: {e}")
             return self.spread if hasattr(self, "spread") else 0.001
-    
+            
     async def compute_fair_price(self) -> float:
         """
         Compute the fair price using top-of-book data and optional inventory skew adjustment.
@@ -513,7 +514,7 @@ class PMMStrategy:
                         self.ask = price
 
                 size_base =  trade_base_size * (size_multiplier ** i)
-                size_base = self.clamp(size_base, min_trade / price, max_trade / price)
+                size_base = clamp(size_base, min_trade / price, max_trade / price)
                 size_base = round(size_base, qty_scale)
 
                 orders.append({
@@ -645,6 +646,7 @@ class PMMStrategy:
             elif side == "sell":
                 self.is_sell = False
                 self.is_buy = True
+
         else:
             # Reset both directions to allowed
             self.is_buy = True

@@ -1,0 +1,95 @@
+[2025-06-02 15:05:23,052][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
+[2025-06-02 15:05:23,052][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
+[2025-06-02 15:05:26,007][pmm_app.py:208][INFO] Initial market data fetched
+[2025-06-02 15:05:26,008][pmm_app.py:251][INFO] Starting strategy
+[2025-06-02 15:05:26,009][pmm_app.py:392][INFO] Warm-up: 5 seconds
+[2025-06-02 15:11:51,296][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:11:51,511][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 309.0
+[2025-06-02 15:11:52,275][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:11:52,481][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:11:52,722][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:11:53,093][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:11:53,095][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:12:09,734][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
+[2025-06-02 15:12:09,734][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
+[2025-06-02 15:12:12,237][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:12:13,093][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:12:13,293][pmm_app.py:211][ERROR] Error fetching initial data: Request error: 'NoneType' object has no attribute 'connect' 189 200
+[2025-06-02 15:12:13,297][pmm_app.py:251][INFO] Starting strategy
+[2025-06-02 15:12:13,297][pmm_app.py:392][INFO] Warm-up: 5 seconds
+[2025-06-02 15:12:16,256][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:12:16,296][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:12:16,481][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:12:16,504][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:12:16,689][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:12:16,904][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:12:29,777][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
+[2025-06-02 15:12:29,778][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
+[2025-06-02 15:12:32,311][pmm_app.py:208][INFO] Initial market data fetched
+[2025-06-02 15:12:32,312][pmm_app.py:251][INFO] Starting strategy
+[2025-06-02 15:12:32,313][pmm_app.py:392][INFO] Warm-up: 5 seconds
+[2025-06-02 15:13:43,915][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:13:44,126][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 201.4
+[2025-06-02 15:13:44,353][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:13:44,561][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 186.0
+[2025-06-02 15:13:45,338][pmm_app.py:440][INFO] Attempt 2: Placed market order to close sell position of size 155.2
+[2025-06-02 15:13:45,771][pmm_app.py:440][INFO] Attempt 2: Placed market order to close sell position of size 139.8
+[2025-06-02 15:13:46,547][pmm_app.py:440][INFO] Attempt 3: Placed market order to close sell position of size 109.0
+[2025-06-02 15:13:46,994][pmm_app.py:440][INFO] Attempt 3: Placed market order to close sell position of size 93.6
+[2025-06-02 15:13:47,764][pmm_app.py:440][INFO] Attempt 4: Placed market order to close sell position of size 62.8
+[2025-06-02 15:13:48,205][pmm_app.py:440][INFO] Attempt 4: Placed market order to close sell position of size 47.4
+[2025-06-02 15:13:48,765][pmm_app.py:445][WARNING] close_position: Reached max retry attempts but position might still be open.
+[2025-06-02 15:13:48,765][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:13:49,206][pmm_app.py:445][WARNING] close_position: Reached max retry attempts but position might still be open.
+[2025-06-02 15:13:49,207][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:13:53,430][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:13:53,644][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 16.6
+[2025-06-02 15:13:54,855][pmm_app.py:440][INFO] Attempt 2: Placed market order to close sell position of size 16.6
+[2025-06-02 15:13:57,184][pmm_app.py:440][INFO] Attempt 3: Placed market order to close sell position of size 16.6
+[2025-06-02 15:13:58,415][pmm_app.py:440][INFO] Attempt 4: Placed market order to close sell position of size 16.6
+[2025-06-02 15:13:59,416][pmm_app.py:445][WARNING] close_position: Reached max retry attempts but position might still be open.
+[2025-06-02 15:13:59,416][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:14:00,034][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:14:01,921][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 16.6
+[2025-06-02 15:14:03,135][pmm_app.py:440][INFO] Attempt 2: Placed market order to close sell position of size 16.6
+[2025-06-02 15:14:04,346][pmm_app.py:440][INFO] Attempt 3: Placed market order to close sell position of size 16.6
+[2025-06-02 15:14:05,579][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:14:06,068][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:14:06,278][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:14:06,456][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:14:06,723][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:14:28,430][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
+[2025-06-02 15:14:28,430][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
+[2025-06-02 15:14:31,512][pmm_app.py:208][INFO] Initial market data fetched
+[2025-06-02 15:14:31,513][pmm_app.py:251][INFO] Starting strategy
+[2025-06-02 15:14:31,513][pmm_app.py:392][INFO] Warm-up: 5 seconds
+[2025-06-02 15:21:14,284][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:21:14,494][pmm_app.py:440][INFO] Attempt 1: Placed market order to close buy position of size 15.5
+[2025-06-02 15:21:14,961][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:21:15,170][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:21:15,702][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:21:15,804][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:21:30,914][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
+[2025-06-02 15:21:30,914][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
+[2025-06-02 15:21:33,876][pmm_app.py:208][INFO] Initial market data fetched
+[2025-06-02 15:21:33,877][pmm_app.py:251][INFO] Starting strategy
+[2025-06-02 15:21:33,877][pmm_app.py:392][INFO] Warm-up: 5 seconds
+[2025-06-02 15:21:47,849][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:21:47,879][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:21:48,063][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 15.5
+[2025-06-02 15:21:48,088][pmm_app.py:440][INFO] Attempt 1: Placed market order to close sell position of size 15.5
+[2025-06-02 15:21:49,269][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:21:49,299][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:21:49,898][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:21:49,899][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:22:03,061][pmm_app.py:60][INFO] Initialized PMM application for OPUSDT
+[2025-06-02 15:22:03,061][pmm_app.py:71][INFO] Starting PMM application for OPUSDT
+[2025-06-02 15:22:05,954][pmm_app.py:208][INFO] Initial market data fetched
+[2025-06-02 15:22:05,954][pmm_app.py:251][INFO] Starting strategy
+[2025-06-02 15:22:05,955][pmm_app.py:392][INFO] Warm-up: 5 seconds
+[2025-06-02 15:23:12,745][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:23:12,954][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:23:12,988][pmm_app.py:120][INFO] Stopping PMM application...
+[2025-06-02 15:23:13,197][pmm_app.py:150][INFO] Task position_task cancelled
+[2025-06-02 15:23:13,566][pmm_app.py:174][INFO] PMM application stopped successfully.
+[2025-06-02 15:23:13,567][pmm_app.py:174][INFO] PMM application stopped successfully.

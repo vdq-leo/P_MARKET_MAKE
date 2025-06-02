@@ -26,22 +26,23 @@ STRATEGY_PARAMS = {
     # Order parameters
     "use_imbalance_price": True,   # Use imbalance price for order placement
     "order_count": 1,           # Number of orders on each side
-    "base_spread": 0.0002,
+    "base_spread": 0.0003,
     "min_spread": 0.0001,       # Minimum spread 
-    "max_spread": 0.0006,       # Maximum spread 
-    "vol_scale": 0.8,           # Volatility impact on spread
+    "max_spread": 0.0050,       # Maximum spread 
+    "vol_scale": 1.0,           # Volatility impact on spread
     "skew_factor": 0.6,           # Inventory skew impact
     "refresh_time": 1,          # Order refresh time in seconds
     
     # Volatility parameters
     "use_dynamic_vol": True,    # Use dynamic volatility
     "vol_window": 10,           # Window for volatility calculation
-    
+    "vol_threshold": 0.0005,    # Tolerance for regime detection
+
     # Order distribution
     "size_multiplier": 2,     # Size multiplier for orders further from mid
 
     # Trade parameters
-    "base_trade_value": 50.0,
+    "base_trade_value": 100.0,
     "min_trade_value": 10.0,     # Minimum trade size in quote currency
     "max_trade_value": 100.0,    # Maximum trade size in quote currency
 
@@ -97,10 +98,10 @@ async def main():
     await run_pmm(
         api_key=api_key,
         api_secret=api_secret,
-        symbol="HYPE",
+        symbol="OP",
         quote="USDT",
         category="linear",
-        testnet=True,  # Not using testnet, using demo API directly
+        testnet=True, 
         strategy_params=STRATEGY_PARAMS
     )
 

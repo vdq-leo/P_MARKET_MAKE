@@ -91,6 +91,10 @@ async def test_rest_api(api_key, api_secret):
     finally:
         await client.close()
 
+async def on_kline(data):
+    """Callback for kline updates"""
+    logger.info(f"Kline update: {data}")
+
 async def on_ticker(data):
     """Callback for ticker updates"""
     logger.info(f"Ticker update: {data}")
@@ -112,22 +116,15 @@ async def test_websocket(api_key, api_secret):
         # Connect to WebSocket
         await client.connect()
 
+        # await client.subscribe_kline("HYPEUSDT", "1")
+
+        # # Register callbacks
+        # client.register_kline_callback("HYPEUSDT", "1", on_kline)
+
+        await client.subscribe_orderbook("HYPEUSDT", "50")
+
         # Register callbacks
-        client.register_ticker_callback("HYPEUSDT", on_ticker)
-        client.register_connection_callback(on_connection)
-        
-        # Subscribe to ticker
-        # await client.subscribe_ticker("HYPEUSDT")
-        
-        # Register callbacks
-        client.register_position_callback(on_position)
-        
-        # Subscribe to position
-        await client.subscribe_positions()
-        
-
-
-
+        client.register_orderbook_callback("HYPEUSDT", on_kline)
 
         # Wait for some updates
         logger.info("Waiting for WebSocket updates (5 seconds)...")
@@ -151,13 +148,12 @@ async def main():
         return
     
     # Test REST API
-    await test_rest_api(api_key, api_secret)
+    # await test_rest_api(api_key, api_secret)
     
     # Test WebSocket
-    # await test_websocket(api_key, api_secret)
+    await test_websocket(api_key, api_secret)
 
-
-async def fetch_all_trade_history_to_csv(category: str, symbol: str, filename: str, limit: int = 100):
+async def fetch_trade_history_to_csv(category: str, symbol: str, filename: str, limit: int = 100, startDate: Optional[int] = None, endDate: Optional[int] = None):
     api_key = os.getenv("BYBIT_API_KEY")
     api_secret = os.getenv("BYBIT_API_SECRET")
 
@@ -203,7 +199,7 @@ async def fetch_all_trade_history_to_csv(category: str, symbol: str, filename: s
         tb = traceback.extract_tb(e.__traceback__)
         logger.error(f"Error getting trade history: {e} at line {tb[-1].lineno}")
 
-async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit: int = 100, startDate: Optional[int] = None, endDate: Optional[int] = None):
+async def fetch_pnl_to_csv(category: str, symbol: str, filename: str, limit: int = 100, startDate: Optional[int] = None, endDate: Optional[int] = None):
     api_key = os.getenv("BYBIT_API_KEY")
     api_secret = os.getenv("BYBIT_API_SECRET")
     client = BybitRestClient(api_key, api_secret)
@@ -213,7 +209,7 @@ async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit:
 
     try:
         while True:
-            trade_hist_params: Dict[str, Any] = {"limit": limit, "startDate": startDate, "endDate": endDate}
+            trade_hist_params: Dict[str, Any] = {"limit": limit}
             if cursor:
                 trade_hist_params["cursor"] = cursor
 
@@ -248,8 +244,7 @@ async def fetch_all_pnl_to_csv(category: str, symbol: str, filename: str, limit:
         tb = traceback.extract_tb(e.__traceback__)
         logger.error(f"Error getting trade history: {e} at line {tb[-1].lineno}")
 
-
 if __name__ == "__main__":
-    asyncio.run(fetch_all_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
-    asyncio.run(fetch_all_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
-    # asyncio.run(main())
+    # asyncio.run(fetch_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
+    # asyncio.run(fetch_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
+    asyncio.run(main())

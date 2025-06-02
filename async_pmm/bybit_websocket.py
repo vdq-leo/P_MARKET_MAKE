@@ -564,25 +564,34 @@ class BybitWebSocketClient:
             
         except Exception as e:
             self.logger.error(f"Error handling execution update: {e}")
-    
-    async def _send_public_subscription(self, topic: str):
+        
+    async def _send_public_subscription(self, topic: str, **kwargs):
         """
-        Send subscription request to public WebSocket
+        Send subscription request to public WebSocket.
         
         Args:
             topic: Topic to subscribe to
+            **kwargs: Optional parameters to include in the subscription message
         """
         if not self.public_connected or not self.public_ws:
             self.logger.warning(f"Cannot subscribe to {topic}: Public WebSocket not connected")
             return
-            
+
         try:
-            sub_message = json.dumps({
-                "op": "subscribe",
+            message = {
+                "op": kwargs.get("op", "subscribe"),
                 "args": [topic]
-            })
+            }
+
+            # Merge any additional custom fields
+            for k, v in kwargs.items():
+                if k not in ["op"]:
+                    message[k] = v
+
+            sub_message = json.dumps(message)
             await self.public_ws.send(sub_message)
-            self.logger.info(f"Subscribed to {topic}")
+            self.logger.info(f"Subscribed to {topic} with message: {sub_message}")
+
         except Exception as e:
             self.logger.error(f"Error subscribing to {topic}: {e}")
     
@@ -627,6 +636,7 @@ class BybitWebSocketClient:
             interval: Kline interval (e.g., '1', '5', '15', '30', '60', '240', 'D', 'W', 'M')
         """
         topic = f"kline.{interval}.{symbol}"
+
         self.public_subscriptions.add(topic)
         await self._send_public_subscription(topic)
     

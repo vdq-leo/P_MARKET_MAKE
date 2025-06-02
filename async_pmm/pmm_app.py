@@ -90,14 +90,10 @@ class PMMApplication:
             # Subscribe to market data
             await self.ws_client.subscribe_ticker(self.symbol_pair)
             await self.ws_client.subscribe_kline(self.symbol_pair, "1")
-            # await self.ws_client.subscribe_orderbook(self.symbol_pair, "50")
-            # await self.ws_client.subscribe_positions(self.symbol_pair, "50")
             
             # Register callbacks
             self.ws_client.register_ticker_callback(self.symbol_pair, self._handle_ticker_update)
             self.ws_client.register_kline_callback(self.symbol_pair, "1", self._handle_kline_update)
-            # self.ws_client.register_orderbook_callback(self.symbol_pair, self._handle_orderbook_update) # Not support yet
-            # self.ws_client.register_position_callback(self.symbol_pair, "1", self._handle_position_update) # Not need yet
                         
             # Start order manager
             await self.order_manager.start()
@@ -330,13 +326,16 @@ class PMMApplication:
         RED = "\033[91m"
         RESET = "\033[0m"
         BOLD = "\033[1m"
+        WHITE = "\033[97m"
 
         def fmt_num(val, fmt, default_color=RESET):
             if val is None:
                 return f"{RED}N/A{RESET}"
             color = RED if val < 0 else default_color
             return f"{color}{fmt.format(val)}{RESET}"
-
+        
+        def bool_color(val):
+            return WHITE if val else RED
 
         await asyncio.sleep(1)  # initial delay
 
@@ -344,6 +343,7 @@ class PMMApplication:
             try:
                 is_buy = self.strategy.is_buy
                 is_sell = self.strategy.is_sell
+                tight_regime = self.strategy.tight_regime
                 spread = float(self.strategy.spread) if self.strategy.spread is not None else None
                 skew = float(self.strategy.skew) if self.strategy.skew is not None else None
                 vol = float(self.strategy.volatility) if self.strategy.volatility is not None else None
@@ -362,13 +362,15 @@ class PMMApplication:
                 output += f"Position        : {fmt_num(int(position), '{:d}', CYAN)}\n"
                 output += f"Nominal Value   : {fmt_num(nominal_value, '{:.2f}', CYAN)}\n\n"
                 
-                output += f"Is Buy          : {BOLD}{is_buy}{RESET}\n"
-                output += f"Is Sell         : {BOLD}{is_sell}{RESET}\n\n"
+                output += f"Tight Regime    : {BOLD}{bool_color(tight_regime)}{tight_regime}{RESET}\n"
+                output += f"Is Buy          : {BOLD}{bool_color(is_buy)}{is_buy}{RESET}\n"
+                output += f"Is Sell         : {BOLD}{bool_color(is_sell)}{is_sell}{RESET}\n\n"
 
                 output += f"Ask Price       : {fmt_num(ask_price, '{:.5f}', RED)}\n"
                 output += f"Fair Price      : {fmt_num(fair_price, '{:.5f}', CYAN)}\n"
                 output += f"Bid Price       : {fmt_num(bid_price, '{:.5f}', GREEN)}\n\n"
 
+                # output += f"Trend Value     : {fmt_num((trend_value * 100) if trend_value is not None else None, '{:.4f} %', YELLOW)}\n"
                 output += f"Volatility      : {fmt_num((vol * 100) if vol is not None else None, '{:.4f} %', YELLOW)}\n"
                 output += f"Spread          : {fmt_num((spread * 100) if spread is not None else None, '{:.4f} %', YELLOW)}\n"
                 output += f"Skew            : {fmt_num((skew * 100) if skew is not None else None, '{:.4f} %', YELLOW)}\n\n"
@@ -394,7 +396,7 @@ class PMMApplication:
             try:
                 if await self.strategy.handle_position_management():
                     await self.close_position()
-                    self.logger.info("Position management condition met. Closed position.")
+                    # self.logger.info("Position management condition met. Closed position.")
 
                 if await self.strategy.handle_risk_management():
                     await self.stop()
