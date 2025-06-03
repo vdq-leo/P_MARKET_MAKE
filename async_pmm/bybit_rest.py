@@ -418,7 +418,6 @@ class BybitRestClient:
                          reduce_only: bool = False, close_on_trigger: bool = False,
                          order_link_id: Optional[str] = None) -> Dict[str, Any]:
         params = {
-            "category": category,
             "symbol": symbol,
             "side": side,
             "orderType": order_type,
@@ -440,7 +439,7 @@ class BybitRestClient:
             
         return params
 
-    async def place_batch_order(self, orders_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def place_batch_order(self, category: str, orders_list: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Place a new order in batch (use create_order_params to get params)
         
@@ -459,7 +458,10 @@ class BybitRestClient:
         Returns:
             Order data
         """
-        params = orders_list
+        params = {
+            "category": category,
+            "request": orders_list
+        }
         return await self._request("POST", "/v5/order/create-batch", params=params, auth=True)
     
     async def cancel_order(self, category: str, symbol: str, 

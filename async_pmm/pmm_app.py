@@ -250,8 +250,8 @@ class PMMApplication:
         """Main strategy loop"""
         self.logger.info("Starting strategy")
 
-        asyncio.create_task(self._log_params(interval = 0.2))
-        asyncio.create_task(self._handle_position_risk(interval = 0.2))
+        asyncio.create_task(self._log_params(interval = 1))
+        asyncio.create_task(self._handle_position_risk(interval = 1))
 
         while self.running and not self.stop_event.is_set():
             try:

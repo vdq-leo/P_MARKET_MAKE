@@ -2,6 +2,8 @@ import os
 import sys
 sys.path.append(os.getcwd())
 
+import time
+from datetime import datetime
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
@@ -9,8 +11,18 @@ from logging.handlers import TimedRotatingFileHandler
 LOG_DIR = "logger"
 os.makedirs(LOG_DIR, exist_ok=True)
 
-FORMAT = '[%(asctime)-15s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
+FORMAT = '[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] %(message)s'
 loggers = {}
+
+class MillisecondFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created)
+        if datefmt:
+            # Manually format and append milliseconds
+            s = dt.strftime('%Y-%m-%d %H:%M:%S') + f".{int(record.msecs):03d}"
+        else:
+            s = dt.strftime('%Y-%m-%d %H:%M:%S') + f".{int(record.msecs):03d}"
+        return s
 
 class SizeAndTimedRotatingFileHandler(TimedRotatingFileHandler):
     """Custom handler for rotating log files based on time and size."""
@@ -42,7 +54,7 @@ def setup_logger(name: str, log_file: str, level: int = logging.DEBUG) -> loggin
     if logger_name in loggers:
         return loggers[logger_name]
 
-    formatter = logging.Formatter(FORMAT)
+    formatter = MillisecondFormatter(FORMAT)
     handler = SizeAndTimedRotatingFileHandler(
         filename=log_file,
         when="midnight",

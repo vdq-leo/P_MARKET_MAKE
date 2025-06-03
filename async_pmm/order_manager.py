@@ -209,7 +209,7 @@ class OrderManager:
                         await self.rest_client.create_order_params(**order) for order in batch_orders
                     ]
                     try:
-                        result = await self.rest_client.place_batch_order(order_params_list)
+                        result = await self.rest_client.place_batch_order(self.category, order_params_list)
                         batch_result_list = result.get("result", {}).get("list", [])
 
                         for order_request, order_resp in zip(batch_orders, batch_result_list):
