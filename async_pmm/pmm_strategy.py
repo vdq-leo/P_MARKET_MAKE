@@ -298,12 +298,9 @@ class PMMStrategy:
                 position_normalized = int(size / base_unit) * side
 
                 # Skew logic: more inventory → less aggressive on that side
-                skew = - position_normalized * (volatility ** (2 - skew_factor))
-                spread = self.spread
-
+                skew = - position_normalized * volatility * skew_factor
                 self.position_normalize = position_normalized
-                self.skew = clamp(skew, -spread, spread)
-
+                
             else:
                 # Spot-based inventory skew
                 fair_price = self.fair_price or 1.0
@@ -372,7 +369,7 @@ class PMMStrategy:
             
             # Compute dynamic spread
             vol = self.volatility or 0.0
-            dynamic_spread = base_spread + 0.5 * vol * vol_scale
+            dynamic_spread = base_spread + vol * vol_scale
             dynamic_spread = clamp(dynamic_spread, min_spread, max_spread)
 
             # Update only if significantly different
@@ -591,7 +588,7 @@ class PMMStrategy:
             price_change = abs(fair_price - self.old_fair_price) / self.old_fair_price
 
             # Dynamic threshold based on spread
-            price_change_threshold = self.params['min_spread'] / 5
+            price_change_threshold = self.params['min_spread']
             if price_change >= price_change_threshold:
                 return True
                 
@@ -628,12 +625,10 @@ class PMMStrategy:
         # Take profit or stop loss check
         if unrlzd_pnl >= float(self.risk["take_profit_value"]):
             self.logger.info(f"Take profit triggered: {unrlzd_pnl}")
-            self.cum_rlzd_pnl += unrlzd_pnl
             return True
 
         elif unrlzd_pnl <= -float(self.risk["stop_loss_value"]):
             self.logger.info(f"Stop loss triggered: {unrlzd_pnl}")
-            self.cum_rlzd_pnl += unrlzd_pnl
             return True
 
         # Adjust direction based on position size
@@ -714,7 +709,7 @@ class PMMStrategy:
                 df["closedPnl"] = pd.to_numeric(df["closedPnl"], errors="coerce").fillna(0)
                 total_pnl = df["closedPnl"].sum()
                 self.cum_rlzd_pnl += total_pnl
-                self.scan_time = int(time.time() * 1000)
+                self.scan_time = int(df["updatedTime"].max())
                 self.logger.info(f"[PNL] Updated: {total_pnl} | Cumulative: {self.cum_rlzd_pnl}" )
 
             else:

@@ -382,6 +382,41 @@ class BybitRestClient:
         Returns:
             Order data
         """
+
+        order_type = order_type.capitalize()
+        time_in_force = time_in_force.upper()
+        side = side.capitalize()
+
+        params = {
+            "category": category,
+            "symbol": symbol,
+            "side": side,
+            "orderType": order_type,
+            "qty": str(qty),
+            "timeInForce": time_in_force
+        }
+
+        if order_type.lower() == "limit" and not price:
+            raise ValueError("Price must be specified for limit orders.")
+
+        if price and order_type.lower() == "limit":
+            params["price"] = str(price)
+            
+        if reduce_only:
+            params["reduceOnly"] = "true"
+            
+        if close_on_trigger:
+            params["closeOnTrigger"] = "true"
+            
+        if order_link_id:
+            params["orderLinkId"] = order_link_id
+            
+        return await self._request("POST", "/v5/order/create", params=params, auth=True)
+    
+    async def create_order_params(self, category: str, symbol: str, side: str, order_type: str, 
+                         qty: str, price: Optional[str] = None, time_in_force: str = "GTC",
+                         reduce_only: bool = False, close_on_trigger: bool = False,
+                         order_link_id: Optional[str] = None) -> Dict[str, Any]:
         params = {
             "category": category,
             "symbol": symbol,
@@ -403,7 +438,29 @@ class BybitRestClient:
         if order_link_id:
             params["orderLinkId"] = order_link_id
             
-        return await self._request("POST", "/v5/order/create", params=params, auth=True)
+        return params
+
+    async def place_batch_order(self, orders_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Place a new order in batch (use create_order_params to get params)
+        
+        Args: List of orders containing dict:
+            category: Product category (spot, linear, inverse)
+            symbol: Trading pair symbol (e.g., 'BTCUSDT')
+            side: Order side (Buy, Sell)
+            order_type: Order type (Limit, Market)
+            qty: Order quantity
+            price: Order price (required for Limit orders)
+            time_in_force: Time in force (GTC, IOC, FOK, PostOnly)
+            reduce_only: Whether the order is reduce-only
+            close_on_trigger: Whether to close position on trigger
+            order_link_id: Custom order ID
+            
+        Returns:
+            Order data
+        """
+        params = orders_list
+        return await self._request("POST", "/v5/order/create-batch", params=params, auth=True)
     
     async def cancel_order(self, category: str, symbol: str, 
                           order_id: Optional[str] = None, 

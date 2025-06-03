@@ -245,6 +245,6 @@ async def fetch_pnl_to_csv(category: str, symbol: str, filename: str, limit: int
         logger.error(f"Error getting trade history: {e} at line {tb[-1].lineno}")
 
 if __name__ == "__main__":
-    # asyncio.run(fetch_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
-    # asyncio.run(fetch_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
-    asyncio.run(main())
+    asyncio.run(fetch_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
+    asyncio.run(fetch_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
+    # asyncio.run(main())

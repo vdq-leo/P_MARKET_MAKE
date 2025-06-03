@@ -65,10 +65,10 @@ class OrderManager:
         # Start order processing tasks
         asyncio.create_task(self._process_order_queue())
         asyncio.create_task(self._process_cancel_queue())
-        # asyncio.create_task(self._process_order_updates_queue())
+        asyncio.create_task(self._process_order_updates_queue())
         
         # Fetch initial open orders
-        # await self._fetch_open_orders()
+        await self._fetch_open_orders()
         
         self.logger.info(f"Order manager started for {self.symbol}")
     
@@ -186,73 +186,89 @@ class OrderManager:
             self.logger.error(f"Error cancelling all orders: {e}")
     
     async def _process_order_queue(self):
-        """Process orders from the queue"""
+        """Process orders from the queue. Use batch order if multiple orders exist."""
         while not self.stop_flag:
             try:
                 if self.order_queue.empty():
                     await asyncio.sleep(0.01)
                     continue
-                    
-                # Get order from queue
-                order_request = await self.order_queue.get()
-                
-                try:
-                    # Extract parameters
-                    category = order_request.pop("category")
-                    symbol = order_request.pop("symbol")
-                    side = order_request.pop("side")
-                    order_type = order_request.pop("order_type")
-                    qty = order_request.pop("qty")
-                    price = order_request.pop("price")
-                    time_in_force = order_request.pop("time_in_force")
-                    reduce_only = order_request.pop("reduce_only")
-                    close_on_trigger = order_request.pop("close_on_trigger")
-                    order_link_id = order_request.pop("order_link_id")
-                    
-                    # Place order
-                    result = await self.rest_client.place_order(
-                        category=category,
-                        symbol=symbol,
-                        side=side,
-                        order_type=order_type,
-                        qty=qty,
-                        price=price,
-                        time_in_force=time_in_force,
-                        reduce_only=reduce_only,
-                        close_on_trigger=close_on_trigger,
-                        order_link_id=order_link_id
-                    )
-                    
-                    # Track order
-                    order_id = result.get("orderId")
-                    # if order_id:
-                    #     self.active_orders[order_id] = {
-                    #         "orderId": order_id,
-                    #         "orderLinkId": order_link_id,
-                    #         "symbol": symbol,
-                    #         "side": side,
-                    #         "orderType": order_type,
-                    #         "price": price,
-                    #         "qty": qty,
-                    #         "timeInForce": time_in_force,
-                    #         "orderStatus": "New",
-                    #         "createdTime": int(time.time() * 1000),
-                    #         "updatedTime": int(time.time() * 1000)
-                    #     }
-                        
-                    self.logger.info(f"Placed order: {order_id} ({side} {qty} @ {price})")
-                    
-                except Exception as e:
-                    self.logger.error(f"Error placing order: {e}")
-                    
-                finally:
-                    # Mark task as done
+
+                # Gather all available orders (non-blocking)
+                batch_orders = []
+                while not self.order_queue.empty() and len(batch_orders) < 10:  # Bybit max batch size
+                    order_request = await self.order_queue.get()
+                    batch_orders.append(order_request)
+
+                if len(batch_orders) == 1:
+                    # Only one order – send as individual order
+                    order_request = batch_orders[0]
+                    await self._place_single_order(order_request)
+                else:
+                    # Batch orders
+                    order_params_list = [
+                        await self.rest_client.create_order_params(**order) for order in batch_orders
+                    ]
+                    try:
+                        result = await self.rest_client.place_batch_order(order_params_list)
+                        batch_result_list = result.get("result", {}).get("list", [])
+
+                        for order_request, order_resp in zip(batch_orders, batch_result_list):
+                            order_id = order_resp.get("orderId")
+                            if order_id:
+                                self.active_orders[order_id] = {
+                                    "orderId": order_id,
+                                    "orderLinkId": order_request.get("order_link_id"),
+                                    "symbol": order_request.get("symbol"),
+                                    "side": order_request.get("side"),
+                                    "orderType": order_request.get("order_type"),
+                                    "price": order_request.get("price"),
+                                    "qty": order_request.get("qty"),
+                                    "timeInForce": order_request.get("time_in_force"),
+                                    "orderStatus": "New",
+                                    "createdTime": int(time.time() * 1000),
+                                    "updatedTime": int(time.time() * 1000)
+                                }
+
+                                self.logger.info(
+                                    f"Batch placed order: {order_id} ({order_request.get('side')} {order_request.get('qty')} @ {order_request.get('price')})"
+                                )
+                    except Exception as e:
+                        self.logger.error(f"Error placing batch order: {e}")
+
+                # Mark all batch orders as done
+                for _ in batch_orders:
                     self.order_queue.task_done()
-                    
+
             except Exception as e:
                 self.logger.error(f"Error in order queue processing: {e}")
                 await asyncio.sleep(1)
-    
+
+    async def _place_single_order(self, order_request: Dict[str, Any]):
+        try:
+            result = await self.rest_client.place_order(**order_request)
+            order_id = result.get("orderId")
+
+            if order_id:
+                self.active_orders[order_id] = {
+                    "orderId": order_id,
+                    "orderLinkId": order_request.get("order_link_id"),
+                    "symbol": order_request.get("symbol"),
+                    "side": order_request.get("side"),
+                    "orderType": order_request.get("order_type"),
+                    "price": order_request.get("price"),
+                    "qty": order_request.get("qty"),
+                    "timeInForce": order_request.get("time_in_force"),
+                    "orderStatus": "New",
+                    "createdTime": int(time.time() * 1000),
+                    "updatedTime": int(time.time() * 1000)
+                }
+
+                self.logger.info(
+                    f"Placed single order: {order_id} ({order_request.get('side')} {order_request.get('qty')} @ {order_request.get('price')})"
+                )
+        except Exception as e:
+            self.logger.error(f"Error placing single order: {e}")
+
     async def _process_cancel_queue(self):
         """Process cancellations from the queue"""
         while not self.stop_flag:
