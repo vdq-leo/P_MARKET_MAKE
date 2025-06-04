@@ -31,7 +31,7 @@ STRATEGY_PARAMS = {
     "max_spread": 0.0020,       # Maximum spread 
     "vol_scale": 0.5,           # Volatility impact on spread
     "skew_factor": 0.1,           # Inventory skew impact
-    "refresh_time": 0.2,          # Order refresh time in seconds
+    "refresh_time": 1,          # Order refresh time in seconds
     
     # Volatility parameters
     "use_dynamic_vol": True,    # Use dynamic volatility

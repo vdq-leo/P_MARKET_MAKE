@@ -600,7 +600,7 @@ class PMMStrategy:
             price_change = abs(fair_price - self.old_fair_price) / self.old_fair_price
 
             # Dynamic threshold based on spread
-            price_change_threshold = self.params['min_spread'] / 5
+            price_change_threshold = self.params['min_spread']
             if price_change >= price_change_threshold:
                 return True
                 
