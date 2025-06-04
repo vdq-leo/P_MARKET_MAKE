@@ -621,7 +621,7 @@ class BybitRestClient:
     
     # Demo Account Endpoints
     
-    async def request_demo_funds(self, coins: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
+    async def request_demo_funds(self, coins: Optional[List[Dict[str, str]]] = None, adjust_type: int = 0) -> Dict[str, Any]:
         """
         Request demo funds
         
@@ -633,7 +633,7 @@ class BybitRestClient:
             Request result
         """
         params = {
-            "adjustType": 0  # 0: add demo funds
+            "adjustType": adjust_type  # 0: add demo funds
         }
         
         if coins:

@@ -216,9 +216,9 @@ class PMMStrategy:
         await asyncio.gather(
             self.update_regime(),
             self.update_volatility(),
-            self.update_inventory_skew(),
-            self.update_trade_size(),
             self.update_spread(),
+            self.update_inventory_skew(),
+            self.update_trade_size()
         )
     
     async def update_volatility(self) -> float:
@@ -295,7 +295,10 @@ class PMMStrategy:
                 base_unit = self.trade_base_size
                 volatility = self.volatility or 0.00001  # avoid zero
 
-                position_normalized = int(size / base_unit) * side
+                if base_unit == 0:
+                    return self.skew
+                
+                position_normalized = int(round(size / base_unit, 0)) * side
 
                 # Skew logic: more inventory → less aggressive on that side
                 skew = - position_normalized * volatility * skew_factor
@@ -333,16 +336,13 @@ class PMMStrategy:
         Returns:
             Calculated trade size in quote currency
         """
-        try:
-            # Ensure within min/max bounds
+        try:            
+            self.trade_value = self.inventory['base_trade_value']
             
-            self.trade_value = self.inventory['base_trade_value']      
-                  
             if self.fair_price == 0:
-                fair_price = await self.compute_fair_price()
-                self.trade_base_size = self.trade_value / fair_price
-            else:
-                self.trade_base_size = self.trade_value / self.fair_price
+                return
+            
+            self.trade_base_size = self.trade_value / self.fair_price
             
         except Exception as e:
             self.logger.error(f"Error updating trade size: {e}")
@@ -382,7 +382,18 @@ class PMMStrategy:
         except Exception as e:
             self.logger.error(f"Error updating spread: {e}")
             return self.spread if hasattr(self, "spread") else 0.001
-            
+    
+    async def _fair_price_cron_job(self, interval: float = 0.1):
+        """Periodically fetch and update realized PnL."""
+        while True:
+            try:
+                await self.compute_fair_price()
+            except Exception as e:
+                import traceback
+                tb = traceback.extract_tb(e.__traceback__)
+                self.logger.error(f"[CRON_FAIR_PRICE] Exception: {e} at line {tb[-1].lineno}")
+            await asyncio.sleep(interval)
+
     async def compute_fair_price(self) -> float:
         """
         Compute the fair price using top-of-book data and optional inventory skew adjustment.
@@ -397,6 +408,7 @@ class PMMStrategy:
             if not required_keys <= data.keys():
                 # Fetch fresh data if incomplete
                 data = await self.rest_client.get_ticker(self.category, self.symbol_pair)
+                self.logger.warning('Use rest api to get ticker data - check web socket')
 
             bid_price = float(data.get('bid1Price', 0))
             ask_price = float(data.get('ask1Price', 0))
@@ -423,7 +435,7 @@ class PMMStrategy:
             return fair_price
 
         except Exception as e:
-            self.logger.error(f"Error computing fair price: {e}")
+            self.logger.error(f"Error computing fair price: {e} {e.__traceback__.tb_lineno}")
             return None
 
     async def generate_orders(self) -> Dict[str, List[Dict[str, Any]]]:
@@ -437,7 +449,7 @@ class PMMStrategy:
             # Ensure we have a valid fair price
             is_buy = self.is_buy
             is_sell = self.is_sell
-            fair_price = await self.compute_fair_price()
+            fair_price = self.fair_price
 
             if fair_price is None or fair_price <= 0:
                 self.logger.warning("Cannot generate orders: Invalid fair price")
@@ -584,11 +596,11 @@ class PMMStrategy:
 
         # 2. Refresh if fair price has moved significantly
         if self.old_fair_price:
-            fair_price = await self.compute_fair_price()
+            fair_price = self.fair_price
             price_change = abs(fair_price - self.old_fair_price) / self.old_fair_price
 
             # Dynamic threshold based on spread
-            price_change_threshold = self.params['min_spread']
+            price_change_threshold = self.params['min_spread'] / 5
             if price_change >= price_change_threshold:
                 return True
                 
@@ -708,12 +720,12 @@ class PMMStrategy:
                 df = pd.DataFrame(all_trades)
                 df["closedPnl"] = pd.to_numeric(df["closedPnl"], errors="coerce").fillna(0)
                 total_pnl = df["closedPnl"].sum()
-                self.cum_rlzd_pnl += total_pnl
-                self.scan_time = int(df["updatedTime"].max())
+                self.cum_rlzd_pnl = total_pnl
                 self.logger.info(f"[PNL] Updated: {total_pnl} | Cumulative: {self.cum_rlzd_pnl}" )
 
             else:
-                self.logger.info("[PNL] No trades found.")
+                # self.logger.info("[PNL] No trades found.")
+                pass
 
         except Exception as e:
             import traceback

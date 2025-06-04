@@ -95,9 +95,10 @@ async def on_kline(data):
     """Callback for kline updates"""
     logger.info(f"Kline update: {data}")
 
+data_ticker = {}
 async def on_ticker(data):
-    """Callback for ticker updates"""
-    logger.info(f"Ticker update: {data}")
+    data_ticker.update(data)
+    logger.info(data_ticker)
 
 async def on_position(data):
     """Callback for position updates"""
@@ -116,15 +117,16 @@ async def test_websocket(api_key, api_secret):
         # Connect to WebSocket
         await client.connect()
 
-        # await client.subscribe_kline("HYPEUSDT", "1")
+        await client.subscribe_ticker("HYPEUSDT")
+        client.register_ticker_callback("HYPEUSDT", on_ticker)
 
-        # # Register callbacks
+        # await client.subscribe_kline("HYPEUSDT", "1")
         # client.register_kline_callback("HYPEUSDT", "1", on_kline)
 
-        await client.subscribe_orderbook("HYPEUSDT", "50")
+        # await client.subscribe_orderbook("HYPEUSDT", "50")
 
-        # Register callbacks
-        client.register_orderbook_callback("HYPEUSDT", on_kline)
+        # # Register callbacks
+        # client.register_orderbook_callback("HYPEUSDT", on_kline)
 
         # Wait for some updates
         logger.info("Waiting for WebSocket updates (5 seconds)...")
@@ -245,6 +247,6 @@ async def fetch_pnl_to_csv(category: str, symbol: str, filename: str, limit: int
         logger.error(f"Error getting trade history: {e} at line {tb[-1].lineno}")
 
 if __name__ == "__main__":
-    asyncio.run(fetch_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
-    asyncio.run(fetch_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
-    # asyncio.run(main())
+    # asyncio.run(fetch_pnl_to_csv("linear", "HYPEUSDT", "pnl_history.csv", 100))
+    # asyncio.run(fetch_trade_history_to_csv("linear", "HYPEUSDT", "trade_history.csv", 100))
+    asyncio.run(main())

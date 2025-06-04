@@ -56,6 +56,9 @@ class PMMApplication:
         self.last_order_time = 0
         self.last_refresh_check = 0
         self.refresh_interval = 1.0  # Check for refreshes every second
+
+        # Init websocket data
+        self.ticker_ws_data = {}
         
         self.logger.info(f"Initialized PMM application for {self.symbol_pair}")
     
@@ -104,9 +107,11 @@ class PMMApplication:
             # Start main loop
             self.running = True
 
-            asyncio.create_task(self.strategy._pnl_cron_job(interval=5.0))
-            asyncio.create_task(self.strategy._cron_update_metrics(interval=5.0))
-            
+            # Start background tasks
+            asyncio.create_task(self.strategy._fair_price_cron_job(interval=0.05))
+            asyncio.create_task(self.strategy._pnl_cron_job(interval=1.0))
+            asyncio.create_task(self.strategy._cron_update_metrics(interval=1.0))
+
             self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
             self.strategy_task = asyncio.create_task(self._run_strategy_loop(), name="strategy_task")
             
@@ -217,7 +222,8 @@ class PMMApplication:
         Args:
             ticker_data: Ticker data
         """
-        await self.strategy.update_market_data(ticker=ticker_data)
+        self.ticker_ws_data.update(ticker_data)
+        await self.strategy.update_market_data(ticker=self.ticker_ws_data)
     
     async def _handle_kline_update(self, kline_data: List[Dict[str, Any]]):
         """
@@ -252,6 +258,10 @@ class PMMApplication:
 
         asyncio.create_task(self._log_params(interval = 1))
         asyncio.create_task(self._handle_position_risk(interval = 1))
+
+        if self.strategy.fair_price == 0:
+            print("waiting for fair price")
+            return
 
         while self.running and not self.stop_event.is_set():
             try:
@@ -360,7 +370,7 @@ class PMMApplication:
                 output += f"{BOLD}=== Strategy State ==={RESET}\n\n"
                 
                 output += f"Position        : {fmt_num(int(position), '{:d}', CYAN)}\n"
-                output += f"Nominal Value   : {fmt_num(nominal_value, '{:.2f}', CYAN)}\n\n"
+                output += f"Nominal Value   : {fmt_num(int(nominal_value), '{:d}', CYAN)}\n\n"
                 
                 output += f"Tight Regime    : {BOLD}{bool_color(tight_regime)}{tight_regime}{RESET}\n"
                 output += f"Is Buy          : {BOLD}{bool_color(is_buy)}{is_buy}{RESET}\n"
