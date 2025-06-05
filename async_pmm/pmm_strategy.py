@@ -294,6 +294,7 @@ class PMMStrategy:
                 size = float(position["size"])
                 base_unit = self.trade_base_size
                 volatility = self.volatility or 0.00001  # avoid zero
+                spread = self.spread
 
                 if base_unit == 0:
                     return self.skew
@@ -302,6 +303,10 @@ class PMMStrategy:
 
                 # Skew logic: more inventory → less aggressive on that side
                 skew = - position_normalized * volatility * skew_factor
+                
+                skew = clamp(skew, -spread, spread)
+
+                self.skew = skew
                 self.position_normalize = position_normalized
                 
             else:
@@ -356,6 +361,7 @@ class PMMStrategy:
         """
         try:
             base_spread = float(self.params.get("base_spread"))
+            skew_factor = float(self.params.get("skew_factor"))
             vol_scale = float(self.params.get("vol_scale"))
             min_spread = float(self.params.get("min_spread"))
             max_spread = float(self.params.get("max_spread"))
@@ -369,7 +375,7 @@ class PMMStrategy:
             
             # Compute dynamic spread
             vol = self.volatility or 0.0
-            dynamic_spread = base_spread + vol * vol_scale
+            dynamic_spread = base_spread + vol * (vol_scale * 0.95 + skew_factor * 0.05)
             dynamic_spread = clamp(dynamic_spread, min_spread, max_spread)
 
             # Update only if significantly different
@@ -721,7 +727,7 @@ class PMMStrategy:
                 df["closedPnl"] = pd.to_numeric(df["closedPnl"], errors="coerce").fillna(0)
                 total_pnl = df["closedPnl"].sum()
                 self.cum_rlzd_pnl = total_pnl
-                self.logger.info(f"[PNL] Updated: {total_pnl} | Cumulative: {self.cum_rlzd_pnl}" )
+                self.logger.info(f"[PNL] Updated Cumulative: {self.cum_rlzd_pnl}" )
 
             else:
                 # self.logger.info("[PNL] No trades found.")

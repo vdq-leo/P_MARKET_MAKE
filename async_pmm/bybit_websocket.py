@@ -9,6 +9,8 @@ import hashlib
 import websockets
 import uvloop
 import inspect
+from uuid import uuid4
+from pybit.unified_trading import WebSocket
 from typing import Dict, List, Any, Callable, Optional, Set
 from urllib.parse import urlencode
 from logger import setup_logger_global
@@ -26,7 +28,7 @@ class BybitWebSocketClient:
     PRIVATE_WS_URL = "wss://stream.bybit.com/v5/private"  # Private endpoint
     
     def __init__(self, api_key: Optional[str] = None, api_secret: Optional[str] = None, 
-                 testnet: bool = True, ping_interval: int = 20, category: str = "linear"):
+                 testnet: bool = True, ping_interval: int = 20, category: str = "linear", use_bybit_ws: bool = True):
         """
         Initialize the WebSocket client
         
@@ -41,6 +43,7 @@ class BybitWebSocketClient:
         self.api_secret = api_secret
         self.testnet = testnet
         self.category = category
+        self.use_bybit_ws = use_bybit_ws
 
         # WebSocket configuration
         self.ping_interval = ping_interval
@@ -51,6 +54,7 @@ class BybitWebSocketClient:
         # WebSocket connections
         self.public_ws = None
         self.private_ws = None
+        self.private_ws_ = None
         self.public_connected = False
         self.private_connected = False
         self.reconnect_count = 0
@@ -82,10 +86,24 @@ class BybitWebSocketClient:
         # Setup logging
         self.logger = setup_logger_global("BYBIT_WS", "bybit_websocket")
         
+        # Setup Bybit WebSocket
+        self._setup_bybit_ws_3rd()
+
         # Adjust URLs for testnet
         if self.testnet:
             self.PUBLIC_WS_URL = "wss://stream.bybit.com/v5/public"
             self.PRIVATE_WS_URL = "wss://stream-demo.bybit.com/v5/private"
+
+    def _setup_bybit_ws_3rd(self):
+        if self.use_bybit_ws:
+            self.private_ws_ = WebSocket(
+                channel_type="private",
+                api_key=self.api_key,
+                api_secret=self.api_secret,
+                testnet=False,
+                demo = self.testnet
+            )
+            self.logger.info("Connected to Bybit Websocket")
 
     def _generate_signature(self, expires: int) -> str:
         """
@@ -144,11 +162,11 @@ class BybitWebSocketClient:
                     else:
                         callback(True)
                 except Exception as e:
-                    self.logger.error(f"Error in connection callback: {e}")
+                    self.logger.error(f"Error in connection callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
             self.public_connected = False
-            self.logger.error(f"Error connecting to public WebSocket: {e}")
+            self.logger.error(f"Error connecting to public WebSocket: {e} {e.__traceback__.tb_lineno}")
             await self._handle_reconnect("public")
     
     async def _connect_private(self):
@@ -191,7 +209,7 @@ class BybitWebSocketClient:
             
         except Exception as e:
             self.private_connected = False
-            self.logger.error(f"Error connecting to private WebSocket: {e}")
+            self.logger.error(f"Error connecting to private WebSocket: {e} {e.__traceback__.tb_lineno}")
             await self._handle_reconnect("private")
     
     async def _handle_reconnect(self, ws_type: str):
@@ -230,9 +248,9 @@ class BybitWebSocketClient:
                     await self._handle_reconnect("public")
                     break
                 except Exception as e:
-                    self.logger.error(f"Error receiving public WebSocket message: {e}")
+                    self.logger.error(f"Error receiving public WebSocket message: {e} {e.__traceback__.tb_lineno}")
         except Exception as e:
-            self.logger.error(f"Error in public message receiver: {e}")
+            self.logger.error(f"Error in public message receiver: {e} {e.__traceback__.tb_lineno}")
             self.public_connected = False
             await self._handle_reconnect("public")
     
@@ -250,9 +268,9 @@ class BybitWebSocketClient:
                     await self._handle_reconnect("private")
                     break
                 except Exception as e:
-                    self.logger.error(f"Error receiving private WebSocket message: {e}")
+                    self.logger.error(f"Error receiving private WebSocket message: {e} {e.__traceback__.tb_lineno}")
         except Exception as e:
-            self.logger.error(f"Error in private message receiver: {e}")
+            self.logger.error(f"Error in private message receiver: {e} {e.__traceback__.tb_lineno}")
             self.private_connected = False
             await self._handle_reconnect("private")
     
@@ -285,7 +303,7 @@ class BybitWebSocketClient:
                         await self._handle_private_message(data)
 
                 except Exception as e:
-                    self.logger.error(f"Error processing message: {e}")
+                    self.logger.error(f"Error processing message: {e} {e.__traceback__.tb_lineno}")
                 finally:
                     self.message_queue.task_done()
 
@@ -307,7 +325,7 @@ class BybitWebSocketClient:
             elif ws_type == "private" and self.private_ws:
                 await self.private_ws.send(pong_msg)
         except Exception as e:
-            self.logger.error(f"Error sending pong: {e}")
+            self.logger.error(f"Error sending pong: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_public_message(self, data: Dict[str, Any]):
         """
@@ -337,7 +355,7 @@ class BybitWebSocketClient:
                 await self._handle_orderbook(topic, data)
             
         except Exception as e:
-            self.logger.error(f"Error handling public message: {e}")
+            self.logger.error(f"Error handling public message: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_private_message(self, data: Dict[str, Any]):
         """
@@ -367,7 +385,7 @@ class BybitWebSocketClient:
                 await self._handle_execution(data)
             
         except Exception as e:
-            self.logger.error(f"Error handling private message: {e}")
+            self.logger.error(f"Error handling private message: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_ticker(self, topic: str, data: Dict[str, Any]):
         """
@@ -395,10 +413,10 @@ class BybitWebSocketClient:
                     try:
                         await callback(ticker_data)
                     except Exception as e:
-                        self.logger.error(f"Error in ticker callback: {e}")
+                        self.logger.error(f"Error in ticker callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
-            self.logger.error(f"Error handling ticker update: {e}")
+            self.logger.error(f"Error handling ticker update: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_kline(self, topic: str, data: Dict[str, Any]):
         """
@@ -450,10 +468,10 @@ class BybitWebSocketClient:
                     try:
                         await callback(self.klines[symbol][interval])
                     except Exception as e:
-                        self.logger.error(f"Error in kline callback: {e}")
+                        self.logger.error(f"Error in kline callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
-            self.logger.error(f"Error handling kline update: {e}")
+            self.logger.error(f"Error handling kline update: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_orderbook(self, topic: str, data: Dict[str, Any]):
         """
@@ -481,10 +499,10 @@ class BybitWebSocketClient:
                     try:
                         await callback(orderbook_data)
                     except Exception as e:
-                        self.logger.error(f"Error in orderbook callback: {e}")
+                        self.logger.error(f"Error in orderbook callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
-            self.logger.error(f"Error handling orderbook update: {e}")
+            self.logger.error(f"Error handling orderbook update: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_position(self, data: Dict[str, Any]):
         """
@@ -507,10 +525,10 @@ class BybitWebSocketClient:
                 try:
                     await callback(position_data)
                 except Exception as e:
-                    self.logger.error(f"Error in position callback: {e}")
+                    self.logger.error(f"Error in position callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
-            self.logger.error(f"Error handling position update: {e}")
+            self.logger.error(f"Error handling position update: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_order(self, data: Dict[str, Any]):
         """
@@ -533,10 +551,10 @@ class BybitWebSocketClient:
                 try:
                     await callback(order_data)
                 except Exception as e:
-                    self.logger.error(f"Error in order callback: {e}")
+                    self.logger.error(f"Error in order callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
-            self.logger.error(f"Error handling order update: {e}")
+            self.logger.error(f"Error handling order update: {e} {e.__traceback__.tb_lineno}")
     
     async def _handle_execution(self, data: Dict[str, Any]):
         """
@@ -560,10 +578,10 @@ class BybitWebSocketClient:
                 try:
                     await callback(execution_data)
                 except Exception as e:
-                    self.logger.error(f"Error in execution callback: {e}")
+                    self.logger.error(f"Error in execution callback: {e} {e.__traceback__.tb_lineno}")
             
         except Exception as e:
-            self.logger.error(f"Error handling execution update: {e}")
+            self.logger.error(f"Error handling execution update: {e} {e.__traceback__.tb_lineno}")
         
     async def _send_public_subscription(self, topic: str, **kwargs):
         """
@@ -590,31 +608,42 @@ class BybitWebSocketClient:
 
             sub_message = json.dumps(message)
             await self.public_ws.send(sub_message)
-            self.logger.info(f"Subscribed to {topic} with message: {sub_message}")
+            self.logger.info(f"Subscribed Public to {topic} with message: {sub_message}")
 
         except Exception as e:
-            self.logger.error(f"Error subscribing to {topic}: {e}")
+            self.logger.error(f"Error subscribing Public to {topic}: {e} {e.__traceback__.tb_lineno}")
     
-    async def _send_private_subscription(self, topic: str):
+    async def _send_private_subscription(self, topic: str, **kwargs):
         """
-        Send subscription request to private WebSocket
+        Send subscription request to private WebSocket.
         
         Args:
             topic: Topic to subscribe to
+            **kwargs: Optional parameters to include in the subscription message
         """
         if not self.private_connected or not self.private_ws:
             self.logger.warning(f"Cannot subscribe to {topic}: Private WebSocket not connected")
             return
             
         try:
-            sub_message = json.dumps({
-                "op": "subscribe",
+            req_id = str(uuid4())
+            message = {
+                "op": kwargs.get("op", "subscribe"),
+                "req_id": req_id,
                 "args": [topic]
-            })
+            }
+
+            # Merge any additional custom fields
+            for k, v in kwargs.items():
+                if k != "op":
+                    message[k] = v
+
+            sub_message = json.dumps(message)
             await self.private_ws.send(sub_message)
-            self.logger.info(f"Subscribed to {topic}")
+            self.logger.info(f"Subscribed Private to {topic} with message: {sub_message}")
+
         except Exception as e:
-            self.logger.error(f"Error subscribing to {topic}: {e}")
+            self.logger.error(f"Error subscribing Private to {topic}: {e} {e.__traceback__.tb_lineno}")
     
     async def subscribe_ticker(self, symbol: str):
         """
@@ -658,9 +687,12 @@ class BybitWebSocketClient:
             self.logger.warning("Cannot subscribe to positions: API credentials not provided")
             return
             
-        topic = "position"
-        self.private_subscriptions.add(topic)
-        await self._send_private_subscription(topic)
+        if not self.use_bybit_ws:
+            topic = "position"
+            self.private_subscriptions.add(topic)
+            await self._send_private_subscription(topic)
+        else:
+            self.logger.info('No need to subscribe to positions - Use Bybit Websocket')
     
     async def subscribe_orders(self):
         """Subscribe to order updates"""
@@ -668,9 +700,12 @@ class BybitWebSocketClient:
             self.logger.warning("Cannot subscribe to orders: API credentials not provided")
             return
             
-        topic = "order"
-        self.private_subscriptions.add(topic)
-        await self._send_private_subscription(topic)
+        if not self.use_bybit_ws:
+            topic = "order"
+            self.private_subscriptions.add(topic)
+            await self._send_private_subscription(topic)
+        else:
+            self.logger.info('No need to subscribe to orders - Use Bybit Websocket')
     
     async def subscribe_executions(self):
         """Subscribe to execution updates"""
@@ -678,9 +713,12 @@ class BybitWebSocketClient:
             self.logger.warning("Cannot subscribe to executions: API credentials not provided")
             return
             
-        topic = "execution"
-        self.private_subscriptions.add(topic)
-        await self._send_private_subscription(topic)
+        if not self.use_bybit_ws:
+            topic = "execution"
+            self.private_subscriptions.add(topic)
+            await self._send_private_subscription(topic)
+        else:
+            self.logger.info('No need to subscribe to executions - Use Bybit Websocket')
     
     def register_ticker_callback(self, symbol: str, callback: Callable[[Dict[str, Any]], Any]):
         """
@@ -729,7 +767,10 @@ class BybitWebSocketClient:
             symbol: Trading pair symbol (e.g., 'BTCUSDT')
             callback: Async callback function
         """
-        self.position_callbacks.append(callback)
+        if not self.use_bybit_ws:
+            self.position_callbacks.append(callback)
+        else:
+            self.private_ws_.position_stream(callback=callback)
     
     def register_order_callback(self, callback: Callable[[List[Dict[str, Any]]], Any]):
         """
@@ -738,7 +779,10 @@ class BybitWebSocketClient:
         Args:
             callback: Async callback function
         """
-        self.order_callbacks.append(callback)
+        if not self.use_bybit_ws:
+            self.order_callbacks.append(callback)
+        else:
+            self.private_ws_.order_stream(callback=callback)
     
     def register_execution_callback(self, callback: Callable[[List[Dict[str, Any]]], Any]):
         """
@@ -747,7 +791,10 @@ class BybitWebSocketClient:
         Args:
             callback: Async callback function
         """
-        self.execution_callbacks.append(callback)
+        if not self.use_bybit_ws:
+            self.execution_callbacks.append(callback)
+        else:
+            self.private_ws_.execution_stream(callback=callback)
     
     def register_connection_callback(self, callback: Callable[[bool], Any]):
         """
@@ -841,4 +888,4 @@ class BybitWebSocketClient:
             self.logger.info("WebSocket connections closed")
             
         except Exception as e:
-            self.logger.error(f"Error closing WebSocket connections: {e}")
+            self.logger.error(f"Error closing WebSocket connections: {e} {e.__traceback__.tb_lineno}")

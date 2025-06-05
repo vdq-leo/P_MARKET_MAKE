@@ -109,7 +109,7 @@ class PMMApplication:
 
             # Start background tasks
             asyncio.create_task(self.strategy._fair_price_cron_job(interval=0.05))
-            asyncio.create_task(self.strategy._pnl_cron_job(interval=1.0))
+            asyncio.create_task(self.strategy._pnl_cron_job(interval=10.0))
             asyncio.create_task(self.strategy._cron_update_metrics(interval=1.0))
 
             self.position_task = asyncio.create_task(self._poll_position_info(interval=1.0), name="position_task")
